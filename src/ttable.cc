@@ -28,7 +28,7 @@
 TranspositionTable::TranspositionTable(int nBits)
 {
     tableSize = 1 << nBits;
-    table = new Entry[tableSize];
+    table = new TTEntry[tableSize];
 
     mask = 0;
     for (int i = 0; i < nBits; i++) {
@@ -44,7 +44,7 @@ TranspositionTable::TranspositionTable(int nBits)
 void TranspositionTable::clear()
 {
     for (int i = 0; i < tableSize; i++) {
-        table[i].hash = 0;
+        table[i].key = 0;
     }
 }
 
@@ -53,15 +53,15 @@ TranspositionTable::~TranspositionTable()
     delete[] table;
 }
 
-const TranspositionTable::Entry *TranspositionTable::lookup(BoardHash hash, const Board &b) const
+const TranspositionTable::TTEntry *TranspositionTable::lookup(Key hash, const Board &b) const
 {
-    BoardHash h = hash & mask;
+    Key h = hash & mask;
 
     lookups++;
-    if (table[h].hash != 0) {
+    if (table[h].key != 0) {
         hits++;
     }
-    if (table[h].hash != hash) {
+    if (table[h].key != hash) {
         misses++;
     }
 
@@ -72,27 +72,27 @@ const TranspositionTable::Entry *TranspositionTable::lookup(BoardHash hash, cons
     }
 #endif
 
-    if (table[h].hash == hash) {
+    if (table[h].key == hash) {
         return &table[h];
     } else {
         return NULL;
     }
 }
 
-void TranspositionTable::insert(BoardHash hash, float eval, BoundType bound, int depth, const Move &bestMove,
+void TranspositionTable::insert(Key hash, float eval, Bound bound, int depth, const Move &bestMove,
                                 const Board &b)
 {
-    BoardHash h = hash & mask;
+    Key h = hash & mask;
 
     bool replaceEntry = false;
-    /**/ if (table[h].hash == 0) {
+    /**/ if (table[h].key == 0) {
         replaceEntry = true;
-    } else if (table[h].hash != hash) // collision
+    } else if (table[h].key != hash) // collision
     {
         replaceEntry = true; /* Always replace such that irrelevant moves do not block the table. */
         collisions++;
     } else {
-        if (depth > table[h].depth) {
+        if (depth > table[h].depth8) {
             replaceEntry = true;
         } else {
             /* NOP */
@@ -100,11 +100,11 @@ void TranspositionTable::insert(BoardHash hash, float eval, BoundType bound, int
     }
 
     if (replaceEntry) {
-        table[h].hash = hash;
-        table[h].eval = eval;
-        table[h].depth = depth;
-        table[h].bound = bound;
-        table[h].bestMove = bestMove;
+        table[h].key = hash;
+        table[h].value8 = eval;
+        table[h].depth8 = depth;
+        table[h].genBound8 = bound;
+        table[h].ttMove = bestMove;
 
 #if SAFE_HASH
         table[h].board = b;
@@ -116,7 +116,7 @@ float TranspositionTable::getFillStatus() const
 {
     int nFilled = 0;
     for (int i = 0; i < tableSize; i++) {
-        if (table[i].hash) {
+        if (table[i].key) {
             nFilled++;
         }
     }

@@ -261,45 +261,45 @@ float PlayerIF_AlgoAB::NegaMax(const Board &board, float alpha, float beta,
 
     const float oldAlpha = alpha;
 
-    const TranspositionTable::Entry *entry = NULL;
+    const TranspositionTable::TTEntry *entry = NULL;
     if (useTT)
         entry = m_ttable->lookup(board.getHash(), board);
     if (entry) {
-        if (entry->depth >= levels_to_go) {
+        if (entry->depth8 >= levels_to_go) {
             if (ALGOTRACE) {
                 INDENT;
                 std::cout << "found table entry !\n";
             }
 
-            if (entry->getBoundType() == TranspositionTable::AccurateValue) {
+            if (entry->getBoundType() == TranspositionTable::BOUND_EXACT) {
                 if (atRoot) {
-                    m_move = entry->bestMove;
+                    m_move = entry->ttMove;
                     m_computedSomeMove = true;
-                    logBestMoveFromTable(board, m_move, entry->eval, entry->depth);
+                    logBestMoveFromTable(board, m_move, entry->value8, entry->depth8);
                 }
 
                 if (ALGOTRACE) {
                     INDENT;
                     std::cout << "entry = " << *entry << "\n";
                 }
-                return entry->eval;
-            } else if (entry->getBoundType() == TranspositionTable::LowerBound) {
-                alpha = std::max(alpha, entry->eval);
-            } else if (entry->getBoundType() == TranspositionTable::UpperBound) {
-                beta = std::min(beta, entry->eval);
+                return entry->value8;
+            } else if (entry->getBoundType() == TranspositionTable::BOUND_LOWER) {
+                alpha = std::max(alpha, entry->value8);
+            } else if (entry->getBoundType() == TranspositionTable::BOUND_UPPER) {
+                beta = std::min(beta, entry->value8);
             }
 
             if (alpha >= beta) {
                 if (atRoot) {
-                    m_move = entry->bestMove;
+                    m_move = entry->ttMove;
                     m_computedSomeMove = true;
                 }
 
                 if (ALGOTRACE) {
-                    std::cout << "  table-> " << entry->eval << "\n";
+                    std::cout << "  table-> " << entry->value8 << "\n";
                 }
 
-                return entry->eval;
+                return entry->value8;
             }
         }
     }
@@ -347,7 +347,7 @@ float PlayerIF_AlgoAB::NegaMax(const Board &board, float alpha, float beta,
 
     if (entry) {
         for (int i = 1; i < moves.size(); i++)
-            if (moves[i] == entry->bestMove) {
+            if (moves[i] == entry->ttMove) {
                 std::swap(moves[0], moves[i]);
                 break;
             }
@@ -540,10 +540,10 @@ void PlayerIF_AlgoAB::logBestMoveFromTable(const Board &b, const Move &m, eval_t
 
         board.doMove(move);
 
-        const TranspositionTable::Entry *entry;
+        const TranspositionTable::TTEntry *entry;
         entry = m_ttable->lookup(board.getHash(), board);
         if (entry) {
-            move = entry->bestMove;
+            move = entry->ttMove;
         } else
             break;
     }

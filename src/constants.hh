@@ -43,6 +43,6 @@ enum
 enum
 {
     TRANSPOSITION_TABLE_SIZE = 20
-}; // significant bits for the transposition-table hash
+}; // significant bits for the transposition-table key
 
 #endif

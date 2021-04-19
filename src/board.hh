@@ -79,11 +79,11 @@ public:
 // move logging for debugging
 std::ostream &operator<<(std::ostream &ostr, const Move &);
 
-typedef unsigned long long BoardHash;
+typedef unsigned long long Key;
 
 /* The board class hold the current configuation of the players' pieces, as well as
    additional status information like the current player and the number of pieces
-   each player can still set. The Board class also maintains a hash-code for the
+   each player can still set. The Board class also maintains a key-code for the
    board using the Zobrist hashing algorithm.
 
    Additionally, the board can include a pointer to the previous board (in a running game).
@@ -104,7 +104,7 @@ public:
     void togglePlayer()
     {
         ::togglePlayer(currentPlayer);
-        hash ^= hash_playerToggle;
+        key ^= hash_playerToggle;
     }
 
     Player getCurrentPlayer() const
@@ -178,13 +178,13 @@ public:
 
     // --- hashes ---
 
-    BoardHash getHash() const
+    Key getHash() const
     {
-        return hash;
+        return key;
     }
-    static void initHashValues(); // fill the hash tables with random values
+    static void initHashValues(); // fill the key tables with random values
 
-    // --- hard board modification, not considering the hash value ---
+    // --- hard board modification, not considering the key value ---
 
     void setPosition_noHash(int p, Player pl)
     {
@@ -209,19 +209,19 @@ private:
 
     boost::shared_ptr<Board> prev;
 
-    // --- hash ---
+    // --- key ---
 
-    BoardHash hash;
+    Key key;
 
     /* The arrays are organized as follows: index [1] is unused, [0] and [2] is mapped
        to the two players. This makes it possible to access the arrays with simply
        'player+1', since player is {-1;1}.
     */
-    static BoardHash hash_pos[3][MAXPOSITIONS]; // player, board-position
-    static BoardHash hash_nToSet[3][MAXPIECES]; // player, number of pieces in stack
-    static BoardHash hash_playerToggle;         // xor'ed to hash if player is PL_Black
+    static Key hash_pos[3][MAXPOSITIONS]; // player, board-position
+    static Key hash_nToSet[3][MAXPIECES]; // player, number of pieces in stack
+    static Key hash_playerToggle;         // xor'ed to key if player is PL_Black
 
-    BoardHash hashFromScratch() const; // for debugging only
+    Key hashFromScratch() const; // for debugging only
 };
 
 #endif

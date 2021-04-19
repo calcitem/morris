@@ -31,55 +31,59 @@ public:
 
     void clear();
 
-    enum BoundType
+    enum Bound
     {
-        LowerBound,
-        AccurateValue,
-        UpperBound
+        BOUND_LOWER,
+        BOUND_EXACT,
+        BOUND_UPPER
     };
 
-    struct Entry
+    struct TTEntry
     {
-        BoardHash hash;
-        float eval;
-        signed char depth; // depth to which this node was calculated
-        signed char bound;
-        Move bestMove;
+        Key key;
+        float value8;
+        signed char depth8; // depth to which this node was calculated
+        signed char genBound8;
+        Move ttMove;
 
 #if SAFE_HASH
         Board board; // TMP
 #endif
 
-        BoundType getBoundType() const
+        Bound getBoundType() const
         {
-            return (BoundType)(bound);
+            return (Bound)(genBound8);
         }
     };
 
-    const Entry *lookup(BoardHash h, const Board &) const;
-    void insert(BoardHash h, float eval, BoundType, int depth, const Move &bestMove, const Board &);
+    const TTEntry *lookup(Key h, const Board &) const;
+    void insert(Key h, float eval, Bound, int depth, const Move &bestMove, const Board &);
 
-    static inline BoundType boundType(float eval, float alpha, float beta)
+    static inline Bound boundType(float eval, float alpha, float beta)
     {
         if (eval <= alpha)
-            return UpperBound;
+            return BOUND_UPPER;
         if (eval >= beta)
-            return LowerBound;
-        return AccurateValue;
+            return BOUND_LOWER;
+
+        return BOUND_EXACT;
     }
 
     void resetStats()
     {
         lookups = hits = collisions = misses = 0;
     }
+
     int nHits() const
     {
         return hits;
     }
+
     int nCollisions() const
     {
         return collisions;
     }
+
     int nLookups() const
     {
         return lookups;
@@ -88,9 +92,9 @@ public:
     float getFillStatus() const;
 
 private:
-    Entry *table;
+    TTEntry *table;
     int tableSize;
-    BoardHash mask;
+    Key mask;
 
     mutable int lookups, hits, collisions, misses;
 };
@@ -100,16 +104,16 @@ typedef boost::shared_ptr<TranspositionTable> ttable_ptr;
 #include <iostream>
 #include <iomanip>
 
-inline std::ostream &operator<<(std::ostream &ostr, const TranspositionTable::BoundType &t)
+inline std::ostream &operator<<(std::ostream &ostr, const TranspositionTable::Bound &t)
 {
     switch (t) {
-    case TranspositionTable::LowerBound:
+    case TranspositionTable::BOUND_LOWER:
         ostr << "lower";
         break;
-    case TranspositionTable::UpperBound:
+    case TranspositionTable::BOUND_UPPER:
         ostr << "upper";
         break;
-    case TranspositionTable::AccurateValue:
+    case TranspositionTable::BOUND_EXACT:
         ostr << "accurate";
         break;
     }
@@ -117,13 +121,13 @@ inline std::ostream &operator<<(std::ostream &ostr, const TranspositionTable::Bo
     return ostr;
 }
 
-inline std::ostream &operator<<(std::ostream &ostr, const TranspositionTable::Entry &e)
+inline std::ostream &operator<<(std::ostream &ostr, const TranspositionTable::TTEntry &e)
 {
-    ostr << "hash=" << std::hex << e.hash
-        << " eval=" << e.eval
-        << " depth=" << ((int)e.depth)
+    ostr << "hash=" << std::hex << e.key
+        << " eval=" << e.value8
+        << " depth=" << ((int)e.depth8)
         << " bound=" << e.getBoundType()
-        << " bestMove=" << e.bestMove;
+        << " ttMove=" << e.ttMove;
     return ostr;
 }
 

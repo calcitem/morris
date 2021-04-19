@@ -70,7 +70,7 @@ public:
 private:
     struct MemEntry
     {
-        BoardHash id;
+        Key id;
         float offset;
     };
 
@@ -101,13 +101,13 @@ public:
 
         int list = b.getHash() & ((1 << SIGNIFICANT_BITS) - 1);
         for (int i = 0; i < memory[list].size(); i++)         {
-            if (memory[list][i].hash == b.getHash())             {
+            if (memory[list][i].key == b.getHash())             {
                 return;
             }
         }
 
         MemEntry mem;
-        mem.hash = b.getHash();
+        mem.key = b.getHash();
         mem.e = e;
         memory[list].push_back(mem);
         nEntries++;
@@ -119,11 +119,11 @@ public:
     {
         return 0.0;
 
-        BoardHash hash = b.getHash();
+        Key key = b.getHash();
 
         int list = b.getHash() & ((1 << SIGNIFICANT_BITS) - 1);
         for (int i = 0; i < memory[list].size(); i++)         {
-            if (memory[list][i].hash == b.getHash())             {
+            if (memory[list][i].key == b.getHash())             {
                 return memory[list][i].e;
             }
         }
@@ -134,7 +134,7 @@ public:
 private:
     struct MemEntry
     {
-        BoardHash hash;
+        Key key;
         float e;
     };
 

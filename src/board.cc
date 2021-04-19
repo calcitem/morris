@@ -66,15 +66,15 @@ std::ostream &operator<<(std::ostream &ostr, const Move &m)
     return ostr;
 }
 
-// generate a random hash value
-static BoardHash randomHash()
+// generate a random key value
+static Key randomHash()
 {
-    return BoardHash(rand()) ^ (BoardHash(rand()) << 16) ^ (BoardHash(rand()) << 32) ^ (BoardHash(rand()) << 48);
+    return Key(rand()) ^ (Key(rand()) << 16) ^ (Key(rand()) << 32) ^ (Key(rand()) << 48);
 }
 
-BoardHash Board::hash_pos[3][MAXPOSITIONS];
-BoardHash Board::hash_nToSet[3][MAXPIECES];
-BoardHash Board::hash_playerToggle;
+Key Board::hash_pos[3][MAXPOSITIONS];
+Key Board::hash_nToSet[3][MAXPIECES];
+Key Board::hash_playerToggle;
 
 void Board::initHashValues()
 {
@@ -100,7 +100,7 @@ void Board::reset(int p_nPiecesToSet)
     nPiecesToSet[0] = nPiecesToSet[1] = p_nPiecesToSet;
     nPiecesOnBoard[0] = nPiecesOnBoard[1] = 0;
 
-    hash = hash_nToSet[0][p_nPiecesToSet] ^ hash_nToSet[2][p_nPiecesToSet];
+    key = hash_nToSet[0][p_nPiecesToSet] ^ hash_nToSet[2][p_nPiecesToSet];
 
     prev.reset();
 }
@@ -119,9 +119,9 @@ void Board::doMove(const Move &m)
         assert(nPiecesToSet[playerIndex] > 0);
 
         boardPos[m.newPos] = currentPlayer;
-        hash ^= hash_pos[currentPlayer + 1][m.newPos];
-        hash ^= hash_nToSet[currentPlayer + 1][nPiecesToSet[playerIndex]];
-        hash ^= hash_nToSet[currentPlayer + 1][nPiecesToSet[playerIndex] - 1];
+        key ^= hash_pos[currentPlayer + 1][m.newPos];
+        key ^= hash_nToSet[currentPlayer + 1][nPiecesToSet[playerIndex]];
+        key ^= hash_nToSet[currentPlayer + 1][nPiecesToSet[playerIndex] - 1];
 
         nPiecesOnBoard[playerIndex]++;
         nPiecesToSet[playerIndex]--;
@@ -132,8 +132,8 @@ void Board::doMove(const Move &m)
     {
         boardPos[m.oldPos] = PL_None;
         boardPos[m.newPos] = currentPlayer;
-        hash ^= hash_pos[currentPlayer + 1][m.oldPos];
-        hash ^= hash_pos[currentPlayer + 1][m.newPos];
+        key ^= hash_pos[currentPlayer + 1][m.oldPos];
+        key ^= hash_pos[currentPlayer + 1][m.newPos];
     }
     break;
     }
@@ -146,14 +146,14 @@ void Board::doMove(const Move &m)
         boardPos[m.takes[i]] = PL_None;
         nPiecesOnBoard[player2Index(opponent(currentPlayer))]--;
 
-        hash ^= hash_pos[opponent(currentPlayer) + 1][m.takes[i]];
+        key ^= hash_pos[opponent(currentPlayer) + 1][m.takes[i]];
     }
 
     // now, it's the next player's turn
 
     togglePlayer();
 
-    //assert(hash == hashFromScratch());
+    //assert(key == hashFromScratch());
 }
 
 void Board::undoMove(const Move &m)
@@ -166,7 +166,7 @@ void Board::undoMove(const Move &m)
         boardPos[m.takes[i]] = opponent(currentPlayer);
         nPiecesOnBoard[player2Index(opponent(currentPlayer))]++;
 
-        hash ^= hash_pos[opponent(currentPlayer) + 1][m.takes[i]];
+        key ^= hash_pos[opponent(currentPlayer) + 1][m.takes[i]];
     }
 
     // undo move
@@ -177,9 +177,9 @@ void Board::undoMove(const Move &m)
         const int playerIndex = player2Index(currentPlayer);
 
         boardPos[m.newPos] = PL_None;
-        hash ^= hash_pos[currentPlayer + 1][m.newPos];
-        hash ^= hash_nToSet[currentPlayer + 1][nPiecesToSet[playerIndex]];
-        hash ^= hash_nToSet[currentPlayer + 1][nPiecesToSet[playerIndex] + 1];
+        key ^= hash_pos[currentPlayer + 1][m.newPos];
+        key ^= hash_nToSet[currentPlayer + 1][nPiecesToSet[playerIndex]];
+        key ^= hash_nToSet[currentPlayer + 1][nPiecesToSet[playerIndex] + 1];
         nPiecesOnBoard[playerIndex]--;
         nPiecesToSet[playerIndex]++;
     }
@@ -188,15 +188,15 @@ void Board::undoMove(const Move &m)
     case Move::Mode_Move:
         boardPos[m.oldPos] = currentPlayer;
         boardPos[m.newPos] = PL_None;
-        hash ^= hash_pos[currentPlayer + 1][m.oldPos];
-        hash ^= hash_pos[currentPlayer + 1][m.newPos];
+        key ^= hash_pos[currentPlayer + 1][m.oldPos];
+        key ^= hash_pos[currentPlayer + 1][m.newPos];
         break;
     }
 }
 
-BoardHash Board::hashFromScratch() const
+Key Board::hashFromScratch() const
 {
-    BoardHash h = 0;
+    Key h = 0;
 
     for (int i = 0; i < MAXPOSITIONS; i++)
         if (boardPos[i] != PL_None) {
@@ -215,7 +215,7 @@ BoardHash Board::hashFromScratch() const
 
 bool Board::operator==(const Board &b) const
 {
-    if (hash != b.hash) {
+    if (key != b.key) {
         return false;
     }
 
