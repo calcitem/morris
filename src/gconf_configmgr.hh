@@ -24,39 +24,41 @@
 
 #include <gconf/gconf-client.h>
 
-
 class ConfigManager_GConf : public ConfigManager
 {
 public:
-  ConfigManager_GConf(int argc, char** argv);
-  ~ConfigManager_GConf();
+    ConfigManager_GConf(int argc, char **argv);
+    ~ConfigManager_GConf();
 
-  virtual void readInitialValues();
+    virtual void readInitialValues();
 
-  virtual void store(const char* key, int   value);
-  virtual void store(const char* key, bool  value);
-  virtual void store(const char* key, float value);
-  virtual void store(const char* key, const char* value);
+    virtual void store(const char *key, int value);
+    virtual void store(const char *key, bool value);
+    virtual void store(const char *key, float value);
+    virtual void store(const char *key, const char *value);
 
-  virtual int   read_int   (const char* key);
-  virtual bool  read_bool  (const char* key);
-  virtual float read_float (const char* key);
-  virtual std::string read_string(const char* key);
+    virtual int read_int(const char *key);
+    virtual bool read_bool(const char *key);
+    virtual float read_float(const char *key);
+    virtual std::string read_string(const char *key);
 
-  void setAppConfigDelegate(configmanager_ptr c) { appConfig.setDelegate(c); }
+    void setAppConfigDelegate(configmanager_ptr c)
+    {
+        appConfig.setDelegate(c);
+    }
 
 private:
-  ConfigManager_Application appConfig;
-  GConfClient* client;
+    ConfigManager_Application appConfig;
+    GConfClient *client;
 
-  friend void cb_gconf_change_notify(GConfClient *client,
-				     guint cnxn_id,
-				     GConfEntry *entry,
-				     gpointer user_data);
+    friend void cb_gconf_change_notify(GConfClient *client,
+                                       guint cnxn_id,
+                                       GConfEntry *entry,
+                                       gpointer user_data);
 
-  void readInitialBoolValue(const char* key);
-  void readInitialFloatValue(const char* key);
-  void readInitialIntValue(const char* key);
+    void readInitialBoolValue(const char *key);
+    void readInitialFloatValue(const char *key);
+    void readInitialIntValue(const char *key);
 };
 
 #endif

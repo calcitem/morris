@@ -27,7 +27,7 @@
 class ApplicationGUI_GtkIF : public ApplicationGUI
 {
 public:
-  virtual GtkWidget* getMainWindow() = 0;
+    virtual GtkWidget *getMainWindow() = 0;
 };
 
 #endif

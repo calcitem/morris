@@ -22,125 +22,124 @@
 #include "board.hh"
 #include <boost/shared_ptr.hpp>
 
-
 class Experience
 {
 public:
-  enum { SIGNIFICANT_BITS=8 };
+    enum
+    {
+        SIGNIFICANT_BITS = 8
+    };
 
-  void reset()
-  {
-    for (int i=0;i< (1<<SIGNIFICANT_BITS) ;i++)
-      memory[i].clear();
-  }
+    void reset()
+    {
+        for (int i = 0; i < (1 << SIGNIFICANT_BITS); i++)
+            memory[i].clear();
+    }
 
-  void addBoard(BoardID b, Player winner)
-  {
-    int list = b & ((1<<SIGNIFICANT_BITS)-1);
-    float offset = (winner==PL_White ? 1.0 : -1.0);
+    void addBoard(BoardID b, Player winner)
+    {
+        int list = b & ((1 << SIGNIFICANT_BITS) - 1);
+        float offset = (winner == PL_White ? 1.0 : -1.0);
 
-    for (int i=0;i<memory[list].size();i++)
-      {
-	if (memory[list][i].id == b)
-	  {
-	    memory[list][i].offset += offset;
-	    return;
-	  }
-      }
+        for (int i = 0; i < memory[list].size(); i++)         {
+            if (memory[list][i].id == b)             {
+                memory[list][i].offset += offset;
+                return;
+            }
+        }
 
-    MemEntry mem;
-    mem.id = b;
-    mem.offset = offset;
-    memory[list].push_back(mem);
-    nEntries++;
-  }
+        MemEntry mem;
+        mem.id = b;
+        mem.offset = offset;
+        memory[list].push_back(mem);
+        nEntries++;
+    }
 
-  float getOffset(BoardID b, Player self) const
-  {
-    int list = b & ((1<<SIGNIFICANT_BITS)-1);
-    for (int i=0;i<memory[list].size();i++)
-      {
-	if (memory[list][i].id == b)
-	  {
-	    return memory[list][i].offset * (self==PL_White ? 1 : -1);
-	  }
-      }
+    float getOffset(BoardID b, Player self) const
+    {
+        int list = b & ((1 << SIGNIFICANT_BITS) - 1);
+        for (int i = 0; i < memory[list].size(); i++)         {
+            if (memory[list][i].id == b)             {
+                return memory[list][i].offset * (self == PL_White ? 1 : -1);
+            }
+        }
 
-    return 0.0;
-  }
+        return 0.0;
+    }
 
 private:
-  struct MemEntry
-  {
-    BoardHash id;
-    float offset;
-  };
+    struct MemEntry
+    {
+        BoardHash id;
+        float offset;
+    };
 
-  std::vector<MemEntry> memory[1<<SIGNIFICANT_BITS];
-  int nEntries;
+    std::vector<MemEntry> memory[1 << SIGNIFICANT_BITS];
+    int nEntries;
 };
 
 typedef boost::shared_ptr<Experience> experience_ptr;
-
 
 // ---------------------------------------------------------------------------
 
 class PositionMemory
 {
 public:
-  enum { SIGNIFICANT_BITS=12 };
+    enum
+    {
+        SIGNIFICANT_BITS = 12
+    };
 
-  PositionMemory() { nEntries=0; }
+    PositionMemory()
+    {
+        nEntries = 0;
+    }
 
-  void storeBoard(const Board& b, float e)
-  {
-    return;
+    void storeBoard(const Board &b, float e)
+    {
+        return;
 
-    int list = b.getHash() & ((1<<SIGNIFICANT_BITS)-1);
-    for (int i=0;i<memory[list].size();i++)
-      {
-	if (memory[list][i].hash == b.getHash())
-	  {
-	    return;
-	  }
-      }
+        int list = b.getHash() & ((1 << SIGNIFICANT_BITS) - 1);
+        for (int i = 0; i < memory[list].size(); i++)         {
+            if (memory[list][i].hash == b.getHash())             {
+                return;
+            }
+        }
 
-    MemEntry mem;
-    mem.hash = b.getHash();
-    mem.e = e;
-    memory[list].push_back(mem);
-    nEntries++;
+        MemEntry mem;
+        mem.hash = b.getHash();
+        mem.e = e;
+        memory[list].push_back(mem);
+        nEntries++;
 
-    //std::cout << "position memory entries: " << nEntries << "\n";
-  }
+        //std::cout << "position memory entries: " << nEntries << "\n";
+    }
 
-  float lookupHash(const Board& b) const
-  {
-    return 0.0;
+    float lookupHash(const Board &b) const
+    {
+        return 0.0;
 
-    BoardHash hash=b.getHash();
+        BoardHash hash = b.getHash();
 
-    int list = b.getHash() & ((1<<SIGNIFICANT_BITS)-1);
-    for (int i=0;i<memory[list].size();i++)
-      {
-	if (memory[list][i].hash == b.getHash())
-	  {
-	    return memory[list][i].e;
-	  }
-      }
+        int list = b.getHash() & ((1 << SIGNIFICANT_BITS) - 1);
+        for (int i = 0; i < memory[list].size(); i++)         {
+            if (memory[list][i].hash == b.getHash())             {
+                return memory[list][i].e;
+            }
+        }
 
-    return 0.0;
-  }
+        return 0.0;
+    }
 
 private:
-  struct MemEntry
-  {
-    BoardHash hash;
-    float e;
-  };
+    struct MemEntry
+    {
+        BoardHash hash;
+        float e;
+    };
 
-  std::vector<MemEntry> memory[1<<SIGNIFICANT_BITS];
-  int nEntries;
+    std::vector<MemEntry> memory[1 << SIGNIFICANT_BITS];
+    int nEntries;
 };
 
 #endif

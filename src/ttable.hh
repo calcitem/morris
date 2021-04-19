@@ -26,51 +26,73 @@
 class TranspositionTable
 {
 public:
-  TranspositionTable(int nBits);
-  ~TranspositionTable();
+    TranspositionTable(int nBits);
+    ~TranspositionTable();
 
-  void clear();
+    void clear();
 
-  enum BoundType { LowerBound, AccurateValue, UpperBound };
+    enum BoundType
+    {
+        LowerBound,
+        AccurateValue,
+        UpperBound
+    };
 
-  struct Entry
-  {
-    BoardHash   hash;
-    float       eval;
-    signed char depth; // depth to which this node was calculated
-    signed char bound;
-    Move        bestMove;
+    struct Entry
+    {
+        BoardHash hash;
+        float eval;
+        signed char depth; // depth to which this node was calculated
+        signed char bound;
+        Move bestMove;
 
 #if SAFE_HASH
-    Board board; // TMP
+        Board board; // TMP
 #endif
 
-    BoundType getBoundType() const { return (BoundType)(bound); }
-  };
+        BoundType getBoundType() const
+        {
+            return (BoundType)(bound);
+        }
+    };
 
-  const Entry* lookup(BoardHash h, const Board&) const;
-  void insert(BoardHash h, float eval, BoundType, int depth, const Move& bestMove, const Board&);
+    const Entry *lookup(BoardHash h, const Board &) const;
+    void insert(BoardHash h, float eval, BoundType, int depth, const Move &bestMove, const Board &);
 
-  static inline BoundType boundType(float eval, float alpha, float beta)
-  {
-    if (eval<=alpha) return UpperBound;
-    if (eval>=beta)  return LowerBound;
-    return AccurateValue;
-  }
+    static inline BoundType boundType(float eval, float alpha, float beta)
+    {
+        if (eval <= alpha)
+            return UpperBound;
+        if (eval >= beta)
+            return LowerBound;
+        return AccurateValue;
+    }
 
-  void resetStats() { lookups=hits=collisions=misses=0; }
-  int  nHits() const { return hits; }
-  int  nCollisions() const { return collisions; }
-  int  nLookups() const { return lookups; }
+    void resetStats()
+    {
+        lookups = hits = collisions = misses = 0;
+    }
+    int nHits() const
+    {
+        return hits;
+    }
+    int nCollisions() const
+    {
+        return collisions;
+    }
+    int nLookups() const
+    {
+        return lookups;
+    }
 
-  float getFillStatus() const;
+    float getFillStatus() const;
 
 private:
-  Entry* table;
-  int tableSize;
-  BoardHash mask;
+    Entry *table;
+    int tableSize;
+    BoardHash mask;
 
-  mutable int lookups,hits,collisions,misses;
+    mutable int lookups, hits, collisions, misses;
 };
 
 typedef boost::shared_ptr<TranspositionTable> ttable_ptr;
@@ -78,26 +100,31 @@ typedef boost::shared_ptr<TranspositionTable> ttable_ptr;
 #include <iostream>
 #include <iomanip>
 
-inline std::ostream& operator<<(std::ostream& ostr, const TranspositionTable::BoundType& t)
+inline std::ostream &operator<<(std::ostream &ostr, const TranspositionTable::BoundType &t)
 {
-  switch (t)
-    {
-    case TranspositionTable::LowerBound: ostr << "lower"; break;
-    case TranspositionTable::UpperBound: ostr << "upper"; break;
-    case TranspositionTable::AccurateValue: ostr << "accurate"; break;
+    switch (t) {
+    case TranspositionTable::LowerBound:
+        ostr << "lower";
+        break;
+    case TranspositionTable::UpperBound:
+        ostr << "upper";
+        break;
+    case TranspositionTable::AccurateValue:
+        ostr << "accurate";
+        break;
     }
 
-  return ostr;
+    return ostr;
 }
 
-inline std::ostream& operator<<(std::ostream& ostr, const TranspositionTable::Entry& e)
+inline std::ostream &operator<<(std::ostream &ostr, const TranspositionTable::Entry &e)
 {
-  ostr << "hash=" << std::hex << e.hash
-       << " eval=" << e.eval
-       << " depth=" << ((int)e.depth)
-       << " bound=" << e.getBoundType()
-       << " bestMove=" << e.bestMove;
-  return ostr;
+    ostr << "hash=" << std::hex << e.hash
+        << " eval=" << e.eval
+        << " depth=" << ((int)e.depth)
+        << " bound=" << e.getBoundType()
+        << " bestMove=" << e.bestMove;
+    return ostr;
 }
 
 #endif

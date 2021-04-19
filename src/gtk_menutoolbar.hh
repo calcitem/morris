@@ -21,10 +21,10 @@
 
 #include <gtk/gtk.h>
 
-void gtk_initMainMenu(GtkWidget* appWindow, GtkWidget* window);
+void gtk_initMainMenu(GtkWidget *appWindow, GtkWidget *window);
 void gtk_connectMenuSignals();
 
 void menu_closedMoveLog(bool active);
-void menu_setPauseOnAI (bool active);
+void menu_setPauseOnAI(bool active);
 
 #endif

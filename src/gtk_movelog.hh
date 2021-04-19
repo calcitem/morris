@@ -22,27 +22,26 @@
 #include "movelog.hh"
 #include <gtk/gtk.h>
 
-
 class MoveLog_Gtk : public MoveLog
 {
 public:
-  MoveLog_Gtk();
-  ~MoveLog_Gtk();
+    MoveLog_Gtk();
+    ~MoveLog_Gtk();
 
-  void refresh();
+    void refresh();
 
 private:
-  GtkWidget* window;
-  GtkWidget* scrolledWindow;
-  GtkWidget* treeview;
+    GtkWidget *window;
+    GtkWidget *scrolledWindow;
+    GtkWidget *treeview;
 
-  GtkListStore* liststore;
+    GtkListStore *liststore;
 
-  gulong destroyHandler;
-  boost::signals2::connection refreshConnection;
+    gulong destroyHandler;
+    boost::signals2::connection refreshConnection;
 
-  void   cbDestroy();
-  friend gboolean cbMoveLog_gtk_destroy(GtkWidget *widget, gpointer data);
+    void cbDestroy();
+    friend gboolean cbMoveLog_gtk_destroy(GtkWidget *widget, gpointer data);
 };
 
 #endif

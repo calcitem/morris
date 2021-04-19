@@ -21,20 +21,24 @@
 
 #include <boost/signals2.hpp>
 
-
 /* A window showing a log of all moves in the current game.
  */
 class MoveLog
 {
 public:
-  virtual ~MoveLog() { }
+    virtual ~MoveLog()
+    {
+    }
 
-  virtual void refresh() = 0;
+    virtual void refresh() = 0;
 
-  boost::signals2::signal<void ()>& getSignal_windowClosed() { return m_signal_windowClosed; }
+    boost::signals2::signal<void()> &getSignal_windowClosed()
+    {
+        return m_signal_windowClosed;
+    }
 
 protected:
-  boost::signals2::signal<void ()> m_signal_windowClosed;
+    boost::signals2::signal<void()> m_signal_windowClosed;
 };
 
 #endif

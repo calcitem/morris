@@ -25,41 +25,39 @@
 #include "board.hh"
 #include "player.hh"
 
-
 enum MouseButton
-  {
+{
     MB_Left,
     MB_Middle,
     MB_Right
-  };
+};
 
 enum GfxState
-  {
-    GS_Inactive,            // no game in progress
-    GS_NonInteractiveMove,  // AI is computing its move
-    GS_Waiting,        // interactive move: waiting for move input
-    GS_DraggingPiece,  // interactive move: dragging of piece in progress
-    GS_Take            // interactive move: taking of piece to progres
-  };
+{
+    GS_Inactive,           // no game in progress
+    GS_NonInteractiveMove, // AI is computing its move
+    GS_Waiting,            // interactive move: waiting for move input
+    GS_DraggingPiece,      // interactive move: dragging of piece in progress
+    GS_Take                // interactive move: taking of piece to progres
+};
 
 enum HoverMode
-  {
+{
     Hover_None,
     Hover_Set,
     Hover_MoveStart,
     Hover_MoveEnd,
     Hover_Take
-  };
+};
 
 struct HoverState
 {
-  HoverState();
+    HoverState();
 
-  HoverMode hoverMode;
-  Position  hoverPos;
-  bool      hoverPosValid;
+    HoverMode hoverMode;
+    Position hoverPos;
+    bool hoverPosValid;
 };
-
 
 /* This is an abstraction layer that helps implement the interactive board GUI.
    This layer implements the user interaction process, independent of the actual
@@ -69,65 +67,93 @@ struct HoverState
 class BoardGUI_Base
 {
 public:
-  BoardGUI_Base();
-  virtual ~BoardGUI_Base() { }
+    BoardGUI_Base();
+    virtual ~BoardGUI_Base()
+    {
+    }
 
-  // recompute everything (e.g. layout for a changed board and new piece sizes)
-  virtual void resetDisplay() { }
+    // recompute everything (e.g. layout for a changed board and new piece sizes)
+    virtual void resetDisplay()
+    {
+    }
 
-  // redraw everything
-  virtual void redrawBoard() = 0;
+    // redraw everything
+    virtual void redrawBoard() = 0;
 
-  void startInteractiveMove();
-  void cancelInteractiveMove();
+    void startInteractiveMove();
+    void cancelInteractiveMove();
 
-  void startNonInteractiveMove();
-  void endNonInteractiveMove();
+    void startNonInteractiveMove();
+    void endNonInteractiveMove();
 
-  virtual void visualizeMove(const Move& move, int gameID);
-  virtual void checkHover() { }
+    virtual void visualizeMove(const Move &move, int gameID);
+    virtual void checkHover()
+    {
+    }
 
-  // hints
+    // hints
 
-  virtual void showHint(const Move&) { }
-  virtual void removeHint() { }
+    virtual void showHint(const Move &)
+    {
+    }
+    virtual void removeHint()
+    {
+    }
 
-  // preferences
-  virtual void preferencesDialog_Display() { }
+    // preferences
+    virtual void preferencesDialog_Display()
+    {
+    }
 
 protected:
-  GfxState          getGfxState() const { return m_gfxState; }
-  const HoverState& getHoverState() const { return m_hoverState; }
-  const Move&       getPlayerMove() const { return m_playermove; }
+    GfxState getGfxState() const
+    {
+        return m_gfxState;
+    }
+    const HoverState &getHoverState() const
+    {
+        return m_hoverState;
+    }
+    const Move &getPlayerMove() const
+    {
+        return m_playermove;
+    }
 
-  virtual void startPieceDrag(Position p, Point2D pixelPos) { }
-  virtual void stopPieceDrag() { }
-  virtual void doPieceDrag(Point2D pixelPos, bool valid) { }
+    virtual void startPieceDrag(Position p, Point2D pixelPos)
+    {
+    }
+    virtual void stopPieceDrag()
+    {
+    }
+    virtual void doPieceDrag(Point2D pixelPos, bool valid)
+    {
+    }
 
-  virtual void invalidateHoverAtPos(Position) { }
-  virtual void changeGfxState(GfxState) { }
+    virtual void invalidateHoverAtPos(Position)
+    {
+    }
+    virtual void changeGfxState(GfxState)
+    {
+    }
 
-  // callback that you have to connect to
+    // callback that you have to connect to
 
-  void cb_buttonPress  (Position p, Point2D pixelPos, MouseButton b);
-  void cb_buttonRelease(Position p, MouseButton b);
-  void cb_mouseMotion  (Position p, Point2D pixelPos);
+    void cb_buttonPress(Position p, Point2D pixelPos, MouseButton b);
+    void cb_buttonRelease(Position p, MouseButton b);
+    void cb_mouseMotion(Position p, Point2D pixelPos);
 
 private:
-  void setState(GfxState s);
-  void setHover(HoverMode mode, Position=-1, bool valid=true);
-  void doMove();
+    void setState(GfxState s);
+    void setHover(HoverMode mode, Position = -1, bool valid = true);
+    void doMove();
 
-  GfxState   m_gfxState;
-  HoverState m_hoverState;
+    GfxState m_gfxState;
+    HoverState m_hoverState;
 
-  Move m_playermove;  // the successively built, interactive player move
+    Move m_playermove; // the successively built, interactive player move
 };
 
 typedef boost::shared_ptr<BoardGUI_Base> boardgui_ptr;
-
-
-
 
 /* The human player object. This closely interacts with the board-GUI.
    In fact, it is very simple and simply switches the interaction mode
@@ -136,14 +162,20 @@ typedef boost::shared_ptr<BoardGUI_Base> boardgui_ptr;
 class PlayerIF_Human : public PlayerIF
 {
 public:
-  PlayerIF_Human() { }
+    PlayerIF_Human()
+    {
+    }
 
-  bool isInteractivePlayer() const { return true; }
+    bool isInteractivePlayer() const
+    {
+        return true;
+    }
 
-  void startMove(const Board& current, int moveID);
-  void forceMove() { }
-  void cancelMove();
+    void startMove(const Board &current, int moveID);
+    void forceMove()
+    {
+    }
+    void cancelMove();
 };
-
 
 #endif

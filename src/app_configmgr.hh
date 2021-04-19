@@ -21,36 +21,36 @@
 
 #include "configmgr.hh"
 
-
 // Helper class.
 class ConfigManager_Chained : public ConfigManager
 {
 public:
-  void setDelegate(configmanager_ptr c) { m_delegate=c; }
+    void setDelegate(configmanager_ptr c)
+    {
+        m_delegate = c;
+    }
 
 protected:
-  configmanager_ptr m_delegate;
+    configmanager_ptr m_delegate;
 };
-
-
 
 class ConfigManager_Application : public ConfigManager_Chained
 {
 public:
-  ConfigManager_Application();
-  ~ConfigManager_Application();
+    ConfigManager_Application();
+    ~ConfigManager_Application();
 
-  virtual void readInitialValues();
+    virtual void readInitialValues();
 
-  virtual void store(GSettings* settings, const char* key, int   value);
-  virtual void store(GSettings* settings, const char* key, bool  value);
-  virtual void store(GSettings* settings, const char* key, float value);
-  virtual void store(GSettings* settings, const char* key, const char* value);
+    virtual void store(GSettings *settings, const char *key, int value);
+    virtual void store(GSettings *settings, const char *key, bool value);
+    virtual void store(GSettings *settings, const char *key, float value);
+    virtual void store(GSettings *settings, const char *key, const char *value);
 
-  virtual int   read_int   (GSettings* settings, const char* key);
-  virtual bool  read_bool  (GSettings* settings, const char* key);
-  virtual float read_float (GSettings* settings, const char* key);
-  virtual std::string read_string(GSettings* settings, const char* key);
+    virtual int read_int(GSettings *settings, const char *key);
+    virtual bool read_bool(GSettings *settings, const char *key);
+    virtual float read_float(GSettings *settings, const char *key);
+    virtual std::string read_string(GSettings *settings, const char *key);
 };
 
 #endif

@@ -24,204 +24,215 @@
 #include "boardgui.hh"
 #include <sys/time.h>
 
-
 struct Animation
 {
-  virtual ~Animation() { }
-  virtual bool action(class BoardGUI_GtkCairo&) = 0; // return true when effect ended
+    virtual ~Animation()
+    {
+    }
+    virtual bool action(class BoardGUI_GtkCairo &) = 0; // return true when effect ended
 
-  int elapsedTimeMS() const;
+    int elapsedTimeMS() const;
 
-  struct timeval startTime;
-  int durationMS;
+    struct timeval startTime;
+    int durationMS;
 };
 
 struct Animation_RemovePiece : public Animation
 {
-  virtual bool action(class BoardGUI_GtkCairo&);
+    virtual bool action(class BoardGUI_GtkCairo &);
 
-  Position pos;
+    Position pos;
 };
 
 struct Animation_RemoveStack : public Animation
 {
-  virtual bool action(class BoardGUI_GtkCairo&);
+    virtual bool action(class BoardGUI_GtkCairo &);
 
-  Player player;
+    Player player;
 };
 
 struct Animation_MoveOverlay : public Animation
 {
-  Animation_MoveOverlay() : overlayIdx(-1) { }
+    Animation_MoveOverlay() : overlayIdx(-1)
+    {
+    }
 
-  virtual bool action(class BoardGUI_GtkCairo&);
+    virtual bool action(class BoardGUI_GtkCairo &);
 
-  Player  player;
-  Point2D startPos;
-  Point2D endPos;
+    Player player;
+    Point2D startPos;
+    Point2D endPos;
 
 private:
-  int     overlayIdx;
+    int overlayIdx;
 };
 
 // Carry out the move and remove the overlays and hidden pieces.
 struct Animation_DoMove : public Animation
 {
-  virtual bool action(class BoardGUI_GtkCairo&);
+    virtual bool action(class BoardGUI_GtkCairo &);
 
-  Move move;
-  int  gameID;
+    Move move;
+    int gameID;
 };
 
 typedef boost::shared_ptr<Animation> animation_ptr;
 
-
 class BoardGUI_GtkCairo : public BoardGUI_Base
 {
 public:
-  BoardGUI_GtkCairo();
-  ~BoardGUI_GtkCairo();
+    BoardGUI_GtkCairo();
+    ~BoardGUI_GtkCairo();
 
-  void resetDisplay();
+    void resetDisplay();
 
-  void redrawBoard();
-  void visualizeMove(const Move&, int gameID);
-  void checkHover();
+    void redrawBoard();
+    void visualizeMove(const Move &, int gameID);
+    void checkHover();
 
-  void showHint(const Move&);
-  void removeHint();
+    void showHint(const Move &);
+    void removeHint();
 
-  GtkWidget* getBoardWidget() { return drawingArea; }
+    GtkWidget *getBoardWidget()
+    {
+        return drawingArea;
+    }
 
-  struct Options
-  {
-    Options();
+    struct Options
+    {
+        Options();
 
-    bool  coloredCrossingWhileDragging;
-    bool  animateComputerMoves;
-    float animationSpeed;  // time in [ms] for moving across whole board
-    bool  set_moveIn;
-    bool  take_moveOut;
-    float take_delay;
-    bool  showCoordinates;
-  };
+        bool coloredCrossingWhileDragging;
+        bool animateComputerMoves;
+        float animationSpeed; // time in [ms] for moving across whole board
+        bool set_moveIn;
+        bool take_moveOut;
+        float take_delay;
+        bool showCoordinates;
+    };
 
-  Options& getOptions() { return options; }
+    Options &getOptions()
+    {
+        return options;
+    }
 
 private:
-  GtkWidget* drawingArea;
-  GdkPixmap* offscreenBuffer;
-  bool       boardGfxInvalid;
+    GtkWidget *drawingArea;
+    GdkPixmap *offscreenBuffer;
+    bool boardGfxInvalid;
 
-  struct OverlayPiece
-  {
-    Player   player;
-    Point2D  coordinate;
-  };
+    struct OverlayPiece
+    {
+        Player player;
+        Point2D coordinate;
+    };
 
-  SmallVec<OverlayPiece,Move::MAXTAKES+1> overlay;
-  SmallVec<Position,Move::MAXTAKES+1> hidePos;
-  Player removeStackPiece;
+    SmallVec<OverlayPiece, Move::MAXTAKES + 1> overlay;
+    SmallVec<Position, Move::MAXTAKES + 1> hidePos;
+    Player removeStackPiece;
 
-  std::vector<animation_ptr> animation;
+    std::vector<animation_ptr> animation;
 
-  void draw_board_complete();
-  void draw_board(int x0,int y0,int w,int h);
-  void expose_area_rect(int x0,int y0,int w,int h);
+    void draw_board_complete();
+    void draw_board(int x0, int y0, int w, int h);
+    void expose_area_rect(int x0, int y0, int w, int h);
 
-  void invalidatePiecePos(Point2D pos_inUnits, float extraRadius=0);
-  virtual void invalidateHoverAtPos(Position);
-  virtual void changeGfxState(GfxState);
+    void invalidatePiecePos(Point2D pos_inUnits, float extraRadius = 0);
+    virtual void invalidateHoverAtPos(Position);
+    virtual void changeGfxState(GfxState);
 
-  void draw_piece         (cairo_t* cr, Point2D pos_inUnits,  Player player, bool halfTransparent=false);
-  void draw_piece_inPixels(cairo_t* cr, Point2D pos_inPixels, Player player, bool halfTransparent=false);
+    void draw_piece(cairo_t *cr, Point2D pos_inUnits, Player player, bool halfTransparent = false);
+    void draw_piece_inPixels(cairo_t *cr, Point2D pos_inPixels, Player player, bool halfTransparent = false);
 
-  // geometric layout
+    // geometric layout
 
-  struct Geometry
-  {
-    Geometry();
+    struct Geometry
+    {
+        Geometry();
 
-    void     fitInto(int w,int h, const Options&);
-    Point2D  board2Pixel(Point2D boardCoord) const;
-    Point2D  pixel2Board(Point2D boardCoord) const;
-    Point2D  getStackPiecePos(Player, int n) const;
-    float    getPieceRadiusInPixels() const { return piece_radius_inUnits*scale_units2pixels; }
-    Position pixel2Pos(int mx,int my) const;
+        void fitInto(int w, int h, const Options &);
+        Point2D board2Pixel(Point2D boardCoord) const;
+        Point2D pixel2Board(Point2D boardCoord) const;
+        Point2D getStackPiecePos(Player, int n) const;
+        float getPieceRadiusInPixels() const
+        {
+            return piece_radius_inUnits * scale_units2pixels;
+        }
+        Position pixel2Pos(int mx, int my) const;
 
-    float width_inUnits;
-    float height_inUnits;
+        float width_inUnits;
+        float height_inUnits;
 
-    float windowWidth_inUnits;
-    float windowHeight_inUnits;
+        float windowWidth_inUnits;
+        float windowHeight_inUnits;
 
-    float scale_units2pixels;
+        float scale_units2pixels;
 
-    float xoffset_board_inUnits;
-    float yoffset_board_inUnits;
+        float xoffset_board_inUnits;
+        float yoffset_board_inUnits;
 
-    float boardBorderLeft_inUnits;
-    float boardBorderRight_inUnits;
-    float boardBorderTop_inUnits;
-    float boardBorderBottom_inUnits;
+        float boardBorderLeft_inUnits;
+        float boardBorderRight_inUnits;
+        float boardBorderTop_inUnits;
+        float boardBorderBottom_inUnits;
 
-    float stackX_white_inUnits;
-    float stackX_black_inUnits;
+        float stackX_white_inUnits;
+        float stackX_black_inUnits;
 
-    float piece_radius_inUnits;
-    float textSize_inUnits;
-  } geom;
+        float piece_radius_inUnits;
+        float textSize_inUnits;
+    } geom;
 
-  // display options
+    // display options
 
-  Options options;
+    Options options;
 
-  // manual piece dragging
+    // manual piece dragging
 
-  virtual void startPieceDrag(Position p, Point2D pixelPos);
-  virtual void stopPieceDrag();
-  virtual void doPieceDrag(Point2D pixelPos, bool valid);
+    virtual void startPieceDrag(Position p, Point2D pixelPos);
+    virtual void stopPieceDrag();
+    virtual void doPieceDrag(Point2D pixelPos, bool valid);
 
-  bool    drag_active;
-  Player  drag_player;
-  Point2D drag_position;
-  float   drag_offset_x;
-  float   drag_offset_y;
+    bool drag_active;
+    Player drag_player;
+    Point2D drag_position;
+    float drag_offset_x;
+    float drag_offset_y;
 
-  // hint display
+    // hint display
 
-  Move m_hint;
-  bool m_showHint;
+    Move m_hint;
+    bool m_showHint;
 
-  // utility functions
+    // utility functions
 
-  void drawRect(cairo_t*, Point2D topleft, Point2D bottomright, bool fill);
-  void drawCoordinates(cairo_t*);
+    void drawRect(cairo_t *, Point2D topleft, Point2D bottomright, bool fill);
+    void drawCoordinates(cairo_t *);
 
-  // additional Gtk callbacks
+    // additional Gtk callbacks
 
-  void cb_expose_area(GtkWidget *widget, GdkEventExpose *event);
-  void cb_configure_area(GtkWidget *widget, GdkEventConfigure *event);
-  void cb_realize_area(GtkWidget *widget);
-  gint cb_animation_timer();
+    void cb_expose_area(GtkWidget *widget, GdkEventExpose *event);
+    void cb_configure_area(GtkWidget *widget, GdkEventConfigure *event);
+    void cb_realize_area(GtkWidget *widget);
+    gint cb_animation_timer();
 
-  // kicker functions
+    // kicker functions
 
-  friend gint button_press_area(GtkWidget *widget, GdkEventButton *event, gpointer obj);
-  friend gint button_release_area(GtkWidget *widget, GdkEventButton *event, gpointer obj);
-  friend gint mouse_motion_area(GtkWidget *widget, GdkEventButton *event, gpointer obj);
+    friend gint button_press_area(GtkWidget *widget, GdkEventButton *event, gpointer obj);
+    friend gint button_release_area(GtkWidget *widget, GdkEventButton *event, gpointer obj);
+    friend gint mouse_motion_area(GtkWidget *widget, GdkEventButton *event, gpointer obj);
 
-  friend gint expose_area(GtkWidget *widget, GdkEventExpose *event, gpointer obj);
-  friend gint configure_area(GtkWidget *widget, GdkEventConfigure *event, gpointer obj);
-  friend gint realize_area(GtkWidget *widget, gpointer obj);
-  friend gint animation_timer(gpointer obj);
+    friend gint expose_area(GtkWidget *widget, GdkEventExpose *event, gpointer obj);
+    friend gint configure_area(GtkWidget *widget, GdkEventConfigure *event, gpointer obj);
+    friend gint realize_area(GtkWidget *widget, gpointer obj);
+    friend gint animation_timer(gpointer obj);
 
-  // animation classes are friends
+    // animation classes are friends
 
-  friend class Animation_RemovePiece;
-  friend class Animation_RemoveStack;
-  friend class Animation_MoveOverlay;
-  friend class Animation_DoMove;
+    friend class Animation_RemovePiece;
+    friend class Animation_RemoveStack;
+    friend class Animation_MoveOverlay;
+    friend class Animation_DoMove;
 };
 
 #endif

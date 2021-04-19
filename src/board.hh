@@ -27,7 +27,6 @@
 #include "util.hh"
 #include "constants.hh"
 
-
 /* This class encodes a half-move of a player. The mode can either be setting
    a new piece onto the board, or moving an existing piece.
    For setting, the 'oldPos' remains undefined.
@@ -35,30 +34,50 @@
 class Move
 {
 public:
-  enum { MAXTAKES=3 };
+    enum
+    {
+        MAXTAKES = 3
+    };
 
-  enum MoveMode { Mode_Set, Mode_Move } mode;
+    enum MoveMode
+    {
+        Mode_Set,
+        Mode_Move
+    } mode;
 
-  Position oldPos;   // old position of the piece (undefined in set-mode)
-  Position newPos;   // new position of the piece
-  SmallVec<Position,MAXTAKES> takes;  // the set of opponent pieces to remove from the board
+    Position oldPos;                    // old position of the piece (undefined in set-mode)
+    Position newPos;                    // new position of the piece
+    SmallVec<Position, MAXTAKES> takes; // the set of opponent pieces to remove from the board
 
+    // methods for easier manipulation
 
-  // methods for easier manipulation
+    void reset()
+    {
+        takes.clear();
+        oldPos = newPos = -1;
+    }
+    void setMove_Set(Position p)
+    {
+        mode = Mode_Set;
+        newPos = p;
+        oldPos = -1;
+    }
+    void setMove_Move(Position from, Position to)
+    {
+        mode = Mode_Move;
+        oldPos = from;
+        newPos = to;
+    }
+    void addTake(Position p)
+    {
+        takes.push_back(p);
+    }
 
-  void reset()                          { takes.clear(); oldPos=newPos=-1; }
-  void setMove_Set(Position p)                  { mode=Mode_Set; newPos=p; oldPos=-1; }
-  void setMove_Move(Position from, Position to) { mode=Mode_Move; oldPos=from; newPos=to; }
-  void addTake(Position p)              { takes.push_back(p); }
-
-  bool operator==(const Move& m) const;
+    bool operator==(const Move &m) const;
 };
 
-
 // move logging for debugging
-std::ostream& operator<<(std::ostream& ostr, const Move&);
-
-
+std::ostream &operator<<(std::ostream &ostr, const Move &);
 
 typedef unsigned long long BoardHash;
 
@@ -75,90 +94,134 @@ typedef unsigned long long BoardHash;
 class Board
 {
 public:
-  void reset(int nPiecesToSet);
+    void reset(int nPiecesToSet);
 
-  void doMove(const Move&);
-  void undoMove(const Move&);
+    void doMove(const Move &);
+    void undoMove(const Move &);
 
-  // --- current player ---
+    // --- current player ---
 
-  void   togglePlayer() { ::togglePlayer(currentPlayer); hash ^= hash_playerToggle; }
+    void togglePlayer()
+    {
+        ::togglePlayer(currentPlayer);
+        hash ^= hash_playerToggle;
+    }
 
-  Player getCurrentPlayer() const { return currentPlayer; }
-  Player getOpponentPlayer() const { return opponent(currentPlayer); }
+    Player getCurrentPlayer() const
+    {
+        return currentPlayer;
+    }
+    Player getOpponentPlayer() const
+    {
+        return opponent(currentPlayer);
+    }
 
+    // --- querying the board ---
 
-  // --- querying the board ---
+    Player getPosition(int p) const
+    {
+        return Player(boardPos[p]);
+    }
 
-  Player getPosition(int p) const { return Player(boardPos[p]); }
+    bool isPlayer(Position p) const
+    {
+        return boardPos[p] == currentPlayer;
+    }
+    bool isOpponent(Position p) const
+    {
+        return boardPos[p] == opponent(currentPlayer);
+    }
+    bool isEmpty(Position p) const
+    {
+        return boardPos[p] == PL_None;
+    }
 
-  bool   isPlayer  (Position p) const { return boardPos[p]==currentPlayer; }
-  bool   isOpponent(Position p) const { return boardPos[p]==opponent(currentPlayer); }
-  bool   isEmpty   (Position p) const { return boardPos[p]==PL_None; }
+    // --- counting pieces ---
 
+    short getNPiecesToSet(Player p) const
+    {
+        return nPiecesToSet[player2Index(p)];
+    }
+    short getNPiecesToSet() const
+    {
+        return nPiecesToSet[player2Index(currentPlayer)];
+    }
 
-  // --- counting pieces ---
+    short getNPiecesOnBoard(Player p) const
+    {
+        return nPiecesOnBoard[player2Index(p)];
+    }
+    short getNPiecesOnBoard() const
+    {
+        return nPiecesOnBoard[player2Index(currentPlayer)];
+    }
 
-  short  getNPiecesToSet(Player p) const { return nPiecesToSet[ player2Index(p) ]; }
-  short  getNPiecesToSet() const { return nPiecesToSet[ player2Index(currentPlayer) ]; }
+    short getNPiecesLeft(Player p) const
+    {
+        return getNPiecesToSet(p) + getNPiecesOnBoard(p);
+    }
+    short getNPiecesLeft() const
+    {
+        return getNPiecesLeft(currentPlayer);
+    }
 
-  short  getNPiecesOnBoard(Player p) const { return nPiecesOnBoard[ player2Index(p) ]; }
-  short  getNPiecesOnBoard() const { return nPiecesOnBoard[ player2Index(currentPlayer) ]; }
+    // --- chaining ---
 
-  short  getNPiecesLeft(Player p) const { return getNPiecesToSet(p) + getNPiecesOnBoard(p); }
-  short  getNPiecesLeft() const { return getNPiecesLeft(currentPlayer); }
+    void setPrevBoard(boost::shared_ptr<Board> b)
+    {
+        prev = b;
+    }
+    boost::shared_ptr<Board> getPrevBoard() const
+    {
+        return prev;
+    }
 
+    // --- hashes ---
 
-  // --- chaining ---
+    BoardHash getHash() const
+    {
+        return hash;
+    }
+    static void initHashValues(); // fill the hash tables with random values
 
-  void   setPrevBoard(boost::shared_ptr<Board> b) { prev=b; }
-  boost::shared_ptr<Board> getPrevBoard() const { return prev; }
+    // --- hard board modification, not considering the hash value ---
 
+    void setPosition_noHash(int p, Player pl)
+    {
+        boardPos[p] = pl;
+    }
 
-  // --- hashes ---
+    // --- standard operators ---
 
-  BoardHash getHash() const { return hash; }
-  static void initHashValues(); // fill the hash tables with random values
+    bool operator==(const Board &b) const;
 
+    // --- debugging ---
 
-  // --- hard board modification, not considering the hash value ---
-
-  void   setPosition_noHash(int p, Player pl) { boardPos[p]=pl; }
-
-
-  // --- standard operators ---
-
-  bool operator==(const Board& b) const;
-
-
-  // --- debugging ---
-
-  //void   setNPiecesToSet(Player pl, int n) { nPiecesToSet[player2Index(pl)]=n; }
-  //void   setCurrentPlayer(Player pl) { currentPlayer=pl; }
-  void   displayOnConsole() const;
+    //void   setNPiecesToSet(Player pl, int n) { nPiecesToSet[player2Index(pl)]=n; }
+    //void   setCurrentPlayer(Player pl) { currentPlayer=pl; }
+    void displayOnConsole() const;
 
 private:
-  signed char boardPos[MAXPOSITIONS];
-  Player      currentPlayer;
-  signed char nPiecesToSet[2];
-  signed char nPiecesOnBoard[2];
+    signed char boardPos[MAXPOSITIONS];
+    Player currentPlayer;
+    signed char nPiecesToSet[2];
+    signed char nPiecesOnBoard[2];
 
-  boost::shared_ptr<Board> prev;
+    boost::shared_ptr<Board> prev;
 
+    // --- hash ---
 
-  // --- hash ---
+    BoardHash hash;
 
-  BoardHash hash;
+    /* The arrays are organized as follows: index [1] is unused, [0] and [2] is mapped
+       to the two players. This makes it possible to access the arrays with simply
+       'player+1', since player is {-1;1}.
+    */
+    static BoardHash hash_pos[3][MAXPOSITIONS]; // player, board-position
+    static BoardHash hash_nToSet[3][MAXPIECES]; // player, number of pieces in stack
+    static BoardHash hash_playerToggle;         // xor'ed to hash if player is PL_Black
 
-  /* The arrays are organized as follows: index [1] is unused, [0] and [2] is mapped
-     to the two players. This makes it possible to access the arrays with simply
-     'player+1', since player is {-1;1}.
-  */
-  static BoardHash hash_pos[3][MAXPOSITIONS]; // player, board-position
-  static BoardHash hash_nToSet[3][MAXPIECES]; // player, number of pieces in stack
-  static BoardHash hash_playerToggle; // xor'ed to hash if player is PL_Black
-
-  BoardHash hashFromScratch() const; // for debugging only
+    BoardHash hashFromScratch() const; // for debugging only
 };
 
 #endif

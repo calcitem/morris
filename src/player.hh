@@ -23,7 +23,6 @@
 #include "rules.hh"
 #include "threadtunnel.hh"
 
-
 /* The main interface for all kinds of players.
 
    Communication of the player to the outside world is usually through
@@ -43,26 +42,50 @@
 class PlayerIF
 {
 public:
-  PlayerIF() { m_selfPlayer=PL_None; }
+    PlayerIF()
+    {
+        m_selfPlayer = PL_None;
+    }
 
-  virtual ~PlayerIF() { }
+    virtual ~PlayerIF()
+    {
+    }
 
-  void setPlayer(Player p) { m_selfPlayer=p; }
-  void setRuleSpec(rulespec_ptr rs) { m_ruleSpec = rs; }
+    void setPlayer(Player p)
+    {
+        m_selfPlayer = p;
+    }
+    void setRuleSpec(rulespec_ptr rs)
+    {
+        m_ruleSpec = rs;
+    }
 
-  virtual void registerThreadTunnel(ThreadTunnel& tunnel) { }
-  virtual bool isInteractivePlayer() const { return false; }
+    virtual void registerThreadTunnel(ThreadTunnel &tunnel)
+    {
+    }
+    virtual bool isInteractivePlayer() const
+    {
+        return false;
+    }
 
-  virtual void resetGame() { }
-  virtual void startMove(const Board& current, int moveID) = 0; // start this player's move
-  virtual void forceMove() { }  // stop thinking process and move as soon as possible
-  virtual void cancelMove() { } // stop thinking and do not move, will join the algo-thread
+    virtual void resetGame()
+    {
+    }
+    virtual void startMove(const Board &current, int moveID) = 0; // start this player's move
+    virtual void forceMove()
+    {
+    } // stop thinking process and move as soon as possible
+    virtual void cancelMove()
+    {
+    } // stop thinking and do not move, will join the algo-thread
 
-  virtual void notifyWinner(Player p) { }
+    virtual void notifyWinner(Player p)
+    {
+    }
 
 protected:
-  Player       m_selfPlayer;
-  rulespec_ptr m_ruleSpec;
+    Player m_selfPlayer;
+    rulespec_ptr m_ruleSpec;
 };
 
 typedef boost::shared_ptr<PlayerIF> player_ptr;

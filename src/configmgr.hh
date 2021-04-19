@@ -23,7 +23,6 @@
 #include <boost/shared_ptr.hpp>
 #include <gio/gio.h>
 
-
 /* The config manager organizes all the configurable options.
    The architecture is as follows:
    - An application config-manager establishes the connection between
@@ -46,63 +45,88 @@
 class ConfigManager
 {
 public:
-  ConfigManager();
-  virtual ~ConfigManager() { }
+    ConfigManager();
+    virtual ~ConfigManager()
+    {
+    }
 
-  virtual void readInitialValues() { }
+    virtual void readInitialValues()
+    {
+    }
 
-  virtual void store(GSettings* settings, const char* key, int   value) = 0;
-  virtual void store(GSettings* settings, const char* key, bool  value) = 0;
-  virtual void store(GSettings* settings, const char* key, float value) = 0;
-  virtual void store(GSettings* settings, const char* key, const char* value) = 0;
+    virtual void store(GSettings *settings, const char *key, int value) = 0;
+    virtual void store(GSettings *settings, const char *key, bool value) = 0;
+    virtual void store(GSettings *settings, const char *key, float value) = 0;
+    virtual void store(GSettings *settings, const char *key, const char *value) = 0;
 
-  virtual int   read_int   (GSettings* settings, const char* key) = 0;
-  virtual bool  read_bool  (GSettings* settings, const char* key) = 0;
-  virtual float read_float (GSettings* settings, const char* key) = 0;
-  virtual std::string read_string(GSettings* settings, const char* key) = 0;
+    virtual int read_int(GSettings *settings, const char *key) = 0;
+    virtual bool read_bool(GSettings *settings, const char *key) = 0;
+    virtual float read_float(GSettings *settings, const char *key) = 0;
+    virtual std::string read_string(GSettings *settings, const char *key) = 0;
 
-  GSettings* main() { return settings; }
-  GSettings* disp() { return disp_settings; }
-  GSettings* ai() { return ai_settings; }
-  GSettings* compA() { return compA_settings; }
-  GSettings* compB() { return compB_settings; }
-  GSettings* weightsA() { return weightsA_settings; }
-  GSettings* weightsB() { return weightsB_settings; }
+    GSettings *main()
+    {
+        return settings;
+    }
+    GSettings *disp()
+    {
+        return disp_settings;
+    }
+    GSettings *ai()
+    {
+        return ai_settings;
+    }
+    GSettings *compA()
+    {
+        return compA_settings;
+    }
+    GSettings *compB()
+    {
+        return compB_settings;
+    }
+    GSettings *weightsA()
+    {
+        return weightsA_settings;
+    }
+    GSettings *weightsB()
+    {
+        return weightsB_settings;
+    }
 
-  // constant strings for the configurable items
+    // constant strings for the configurable items
 
-  static const char* itemComputer_maxTime[2];
-  static const char* itemComputer_maxDepth[2];
-  static const char* itemComputer_weightMaterial[2];
-  static const char* itemComputer_weightFreedom[2];
-  static const char* itemComputer_weightMills[2];
-  static const char* itemComputer_weightExperience[2];
+    static const char *itemComputer_maxTime[2];
+    static const char *itemComputer_maxDepth[2];
+    static const char *itemComputer_weightMaterial[2];
+    static const char *itemComputer_weightFreedom[2];
+    static const char *itemComputer_weightMills[2];
+    static const char *itemComputer_weightExperience[2];
 
-  static const char* itemComputers_shareTTables;
+    static const char *itemComputers_shareTTables;
 
-  static const char* itemDisplay_showGameOverMessageBox;
-  static const char* itemDisplayGtk_showCoordinates;
-  static const char* itemDisplayGtk_coloredCrossingsWhileDragging;
-  static const char* itemDisplayGtk_animateComputerMoves;
-  static const char* itemDisplayGtk_animateSettingOfPieces;
-  static const char* itemDisplayGtk_animateTakes;
-  static const char* itemDisplayGtk_animationSpeed;
-  static const char* itemDisplayGtk_takePieceDelay;
+    static const char *itemDisplay_showGameOverMessageBox;
+    static const char *itemDisplayGtk_showCoordinates;
+    static const char *itemDisplayGtk_coloredCrossingsWhileDragging;
+    static const char *itemDisplayGtk_animateComputerMoves;
+    static const char *itemDisplayGtk_animateSettingOfPieces;
+    static const char *itemDisplayGtk_animateTakes;
+    static const char *itemDisplayGtk_animationSpeed;
+    static const char *itemDisplayGtk_takePieceDelay;
 
-  static const char* itemPref_pauseOnAIPlayer;
-  static const char* itemPref_showLogOfMoves;
+    static const char *itemPref_pauseOnAIPlayer;
+    static const char *itemPref_showLogOfMoves;
 
 protected:
-  GSettings* settings;
-  GSettings* disp_settings;
-  GSettings* ai_settings;
-  GSettings* compA_settings;
-  GSettings* compB_settings;
-  GSettings* weightsA_settings;
-  GSettings* weightsB_settings;
+    GSettings *settings;
+    GSettings *disp_settings;
+    GSettings *ai_settings;
+    GSettings *compA_settings;
+    GSettings *compB_settings;
+    GSettings *weightsA_settings;
+    GSettings *weightsB_settings;
 
-  // Compare two config-keys. This function is optimized for the comparisons of the keys.
-  static bool cmp(const char*, const char*);
+    // Compare two config-keys. This function is optimized for the comparisons of the keys.
+    static bool cmp(const char *, const char *);
 };
 
 typedef boost::shared_ptr<ConfigManager> configmanager_ptr;

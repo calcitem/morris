@@ -19,12 +19,30 @@
 #ifndef CONSTANTS_HH
 #define CONSTANTS_HH
 
-enum { MAXPOSITIONS  =36 };  // maximum number of positions on a board
-enum { MAXPIECES     =15 };  // maximum number of pieces for a player
-enum { MAXNEIGHBORS  =8  };  // maximum number of neighbors of a board position
-enum { MAXMILLSIZE   =3  };  // maximum mill-size
-enum { MAXSEARCHDEPTH=50 };
+enum
+{
+    MAXPOSITIONS = 36
+}; // maximum number of positions on a board
+enum
+{
+    MAXPIECES = 15
+}; // maximum number of pieces for a player
+enum
+{
+    MAXNEIGHBORS = 8
+}; // maximum number of neighbors of a board position
+enum
+{
+    MAXMILLSIZE = 3
+}; // maximum mill-size
+enum
+{
+    MAXSEARCHDEPTH = 50
+};
 
-enum { TRANSPOSITION_TABLE_SIZE=20 }; // significant bits for the transposition-table hash
+enum
+{
+    TRANSPOSITION_TABLE_SIZE = 20
+}; // significant bits for the transposition-table hash
 
 #endif

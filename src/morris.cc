@@ -24,30 +24,28 @@
 #include <assert.h>
 #include <iostream>
 
-
 int main(int argc, char **argv)
 {
-  srand(time(NULL));
+    srand(time(NULL));
 
-  // init internationalization
+    // init internationalization
 
-  setlocale(LC_ALL, "");
-  bindtextdomain(PACKAGE, LOCALEDIR);
-  textdomain(PACKAGE);
+    setlocale(LC_ALL, "");
+    bindtextdomain(PACKAGE, LOCALEDIR);
+    textdomain(PACKAGE);
 
-  // start main application control
-  MainApp::createMainAppSingleton();
+    // start main application control
+    MainApp::createMainAppSingleton();
 
-  // init GUI
-  //ApplicationGUI_Gnome::initApplicationGUI(argc, argv);
-  ApplicationGUI_Gtk::initApplicationGUI(argc, argv);
+    // init GUI
+    //ApplicationGUI_Gnome::initApplicationGUI(argc, argv);
+    ApplicationGUI_Gtk::initApplicationGUI(argc, argv);
 
-  // set default state
-  MainApp::app().init();
+    // set default state
+    MainApp::app().init();
 
-  // start GUI
-  MainApp::app().getApplicationGUI()->startApplication();
+    // start GUI
+    MainApp::app().getApplicationGUI()->startApplication();
 
-  return 0;
+    return 0;
 }
-

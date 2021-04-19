@@ -21,7 +21,6 @@
 
 #include "board.hh"
 
-
 /* The thread-tunnel provides the interface through which the players
    communicate to the main application. The thread-tunnel object is
    required, because many players will run in separate threads and
@@ -31,25 +30,31 @@
 class ThreadTunnel
 {
 public:
-  ThreadTunnel() {} 
-  virtual ~ThreadTunnel() { }
+    ThreadTunnel()
+    {
+    }
+    virtual ~ThreadTunnel()
+    {
+    }
 
-  // --- thread tunnels ---
+    // --- thread tunnels ---
 
-  // Set the progress bar in the status-line (value is in [0;1]).
-  virtual void setProgress(float progress) { }
+    // Set the progress bar in the status-line (value is in [0;1]).
+    virtual void setProgress(float progress)
+    {
+    }
 
-  // Show some additional information about the AI thinking-process in the statusbar.
-  virtual void showThinkingInfo(const std::string&) { }
+    // Show some additional information about the AI thinking-process in the statusbar.
+    virtual void showThinkingInfo(const std::string &)
+    {
+    }
 
-  // Send move to main application.
-  virtual void doMove(Move m, int moveID) = 0;
+    // Send move to main application.
+    virtual void doMove(Move m, int moveID) = 0;
 
-  // currently unused
-  // virtual void setStatusbar(const char*) { }
+    // currently unused
+    // virtual void setStatusbar(const char*) { }
 };
-
-
 
 /* Define and install a run-once function that is executed
    once when the program is idle.
@@ -58,15 +63,17 @@ public:
 class IdleFunc
 {
 public:
-  virtual ~IdleFunc() { }
+    virtual ~IdleFunc()
+    {
+    }
 
-  // The idle function...
-  virtual void operator() () = 0;
+    // The idle function...
+    virtual void operator()() = 0;
 
-  /* The install function is defined in one of the
-     GUI-framework specific modules (e.g., gtk_threadtunnel.cc).
-  */
-  static void install(IdleFunc*);
+    /* The install function is defined in one of the
+         GUI-framework specific modules (e.g., gtk_threadtunnel.cc).
+      */
+    static void install(IdleFunc *);
 };
 
 #endif

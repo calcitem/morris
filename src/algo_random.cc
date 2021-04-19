@@ -19,14 +19,13 @@
 #include "algo_random.hh"
 #include "mainapp.hh"
 
-
-void PlayerIF_AlgoRandom::startMove(const Board& current, int moveID)
+void PlayerIF_AlgoRandom::startMove(const Board &current, int moveID)
 {
-  std::vector<Move> moves;
-  m_ruleSpec->generateMoves(moves, current);
+    std::vector<Move> moves;
+    m_ruleSpec->generateMoves(moves, current);
 
-  assert(moves.size()>0);
-  int idx = rand()%moves.size();
+    assert(moves.size() > 0);
+    int idx = rand() % moves.size();
 
-  m_tunnel->doMove(moves[idx], moveID);
+    m_tunnel->doMove(moves[idx], moveID);
 }

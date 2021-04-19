@@ -22,145 +22,140 @@
 #include "gtk_prefDisplay.hh"
 #include <gtk/gtk.h>
 
-static const int PADDING=8;
-
+static const int PADDING = 8;
 
 bool preferencesDialog_Display()
 {
-  ApplicationGUI_GtkIF* appgui = dynamic_cast<ApplicationGUI_GtkIF*>(MainApp::app().getApplicationGUI().get());
-  GtkWidget* window = appgui->getMainWindow();
-  configmanager_ptr config = MainApp::app().getConfigManager();
+    ApplicationGUI_GtkIF *appgui = dynamic_cast<ApplicationGUI_GtkIF *>(MainApp::app().getApplicationGUI().get());
+    GtkWidget *window = appgui->getMainWindow();
+    configmanager_ptr config = MainApp::app().getConfigManager();
 
-  GtkWidget *pref_dialog, *vbox;
+    GtkWidget *pref_dialog, *vbox;
 
-  pref_dialog = gtk_dialog_new_with_buttons(_("Display Preferences"),
-					    GTK_WINDOW(window),
-					    GtkDialogFlags(GTK_DIALOG_MODAL | GTK_DIALOG_DESTROY_WITH_PARENT),
-					    GTK_STOCK_OK,     GTK_RESPONSE_ACCEPT,
-					    GTK_STOCK_CANCEL, GTK_RESPONSE_REJECT,
-					    NULL);
-  gtk_window_set_resizable(GTK_WINDOW(pref_dialog), FALSE);
+    pref_dialog = gtk_dialog_new_with_buttons(_("Display Preferences"),
+                                              GTK_WINDOW(window),
+                                              GtkDialogFlags(GTK_DIALOG_MODAL | GTK_DIALOG_DESTROY_WITH_PARENT),
+                                              GTK_STOCK_OK, GTK_RESPONSE_ACCEPT,
+                                              GTK_STOCK_CANCEL, GTK_RESPONSE_REJECT,
+                                              NULL);
+    gtk_window_set_resizable(GTK_WINDOW(pref_dialog), FALSE);
 
-  // board selection
+    // board selection
 
-  vbox = gtk_vbox_new(FALSE,0);
+    vbox = gtk_vbox_new(FALSE, 0);
 
-  GtkWidget* check_animComp = gtk_check_button_new_with_label(_("animate computer moves"));
-  GtkWidget* check_animSet  = gtk_check_button_new_with_label(_("animate setting of pieces"));
-  GtkWidget* check_animTake = gtk_check_button_new_with_label(_("animate takes"));
-  GtkWidget* check_colCross = gtk_check_button_new_with_label(_("colored crossings while dragging"));
-  GtkWidget* check_gameOverReq = gtk_check_button_new_with_label(_("show game-over message box"));
-  GtkWidget* check_showCoords  = gtk_check_button_new_with_label(_("show coordinates"));
+    GtkWidget *check_animComp = gtk_check_button_new_with_label(_("animate computer moves"));
+    GtkWidget *check_animSet = gtk_check_button_new_with_label(_("animate setting of pieces"));
+    GtkWidget *check_animTake = gtk_check_button_new_with_label(_("animate takes"));
+    GtkWidget *check_colCross = gtk_check_button_new_with_label(_("colored crossings while dragging"));
+    GtkWidget *check_gameOverReq = gtk_check_button_new_with_label(_("show game-over message box"));
+    GtkWidget *check_showCoords = gtk_check_button_new_with_label(_("show coordinates"));
 
-  gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(check_gameOverReq),
-			       config->read_bool(config->disp(), ConfigManager::itemDisplay_showGameOverMessageBox));
-  gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(check_animComp),
-			       config->read_bool(config->disp(), ConfigManager::itemDisplayGtk_animateComputerMoves));
-  gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(check_animSet),
-			       config->read_bool(config->disp(), ConfigManager::itemDisplayGtk_animateSettingOfPieces));
-  gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(check_animTake),
-			       config->read_bool(config->disp(), ConfigManager::itemDisplayGtk_animateTakes));
-  gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(check_showCoords),
-			       config->read_bool(config->disp(), ConfigManager::itemDisplayGtk_showCoordinates));
-  gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(check_colCross),
-			       config->read_bool(config->disp(), ConfigManager::itemDisplayGtk_coloredCrossingsWhileDragging));
+    gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(check_gameOverReq),
+                                 config->read_bool(config->disp(), ConfigManager::itemDisplay_showGameOverMessageBox));
+    gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(check_animComp),
+                                 config->read_bool(config->disp(), ConfigManager::itemDisplayGtk_animateComputerMoves));
+    gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(check_animSet),
+                                 config->read_bool(config->disp(), ConfigManager::itemDisplayGtk_animateSettingOfPieces));
+    gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(check_animTake),
+                                 config->read_bool(config->disp(), ConfigManager::itemDisplayGtk_animateTakes));
+    gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(check_showCoords),
+                                 config->read_bool(config->disp(), ConfigManager::itemDisplayGtk_showCoordinates));
+    gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(check_colCross),
+                                 config->read_bool(config->disp(), ConfigManager::itemDisplayGtk_coloredCrossingsWhileDragging));
 
-  gtk_box_pack_start(GTK_BOX(vbox), check_gameOverReq, FALSE, TRUE, PADDING/2);
-  gtk_box_pack_start(GTK_BOX(vbox), check_showCoords,  FALSE, TRUE, PADDING/2);
-  gtk_box_pack_start(GTK_BOX(vbox), check_colCross,    FALSE, TRUE, PADDING/2);
-  gtk_box_pack_start(GTK_BOX(vbox), check_animComp,    FALSE, TRUE, PADDING/2);
-  gtk_box_pack_start(GTK_BOX(vbox), check_animSet,     FALSE, TRUE, PADDING/2);
-  gtk_box_pack_start(GTK_BOX(vbox), check_animTake,    FALSE, TRUE, PADDING/2);
+    gtk_box_pack_start(GTK_BOX(vbox), check_gameOverReq, FALSE, TRUE, PADDING / 2);
+    gtk_box_pack_start(GTK_BOX(vbox), check_showCoords, FALSE, TRUE, PADDING / 2);
+    gtk_box_pack_start(GTK_BOX(vbox), check_colCross, FALSE, TRUE, PADDING / 2);
+    gtk_box_pack_start(GTK_BOX(vbox), check_animComp, FALSE, TRUE, PADDING / 2);
+    gtk_box_pack_start(GTK_BOX(vbox), check_animSet, FALSE, TRUE, PADDING / 2);
+    gtk_box_pack_start(GTK_BOX(vbox), check_animTake, FALSE, TRUE, PADDING / 2);
 
-  GtkWidget* hbox  = gtk_hbox_new(FALSE,0);
-  GtkWidget* label = gtk_label_new(_("animation speed"));
+    GtkWidget *hbox = gtk_hbox_new(FALSE, 0);
+    GtkWidget *label = gtk_label_new(_("animation speed"));
 
+    float animSpeed = config->read_float(config->disp(), ConfigManager::itemDisplayGtk_animationSpeed);
+    animSpeed = 100 - animSpeed / 20;
+    GtkObject *adj_animSpeed = gtk_adjustment_new(animSpeed,
+                                                  0.0,   // lower
+                                                  100.0, // upper
+                                                  1.0,   // step_increment
+                                                  10.0,  // page_increment
+                                                  0.0);  // page_size
 
-  float animSpeed = config->read_float(config->disp(), ConfigManager::itemDisplayGtk_animationSpeed);
-  animSpeed = 100-animSpeed/20;
-  GtkObject* adj_animSpeed = gtk_adjustment_new(animSpeed,
-						0.0,  // lower
-						100.0, // upper
-						1.0,  // step_increment
-						10.0, // page_increment
-						0.0); // page_size
+    GtkWidget *scale_animSpeed = gtk_hscale_new(GTK_ADJUSTMENT(adj_animSpeed));
 
-  GtkWidget* scale_animSpeed = gtk_hscale_new( GTK_ADJUSTMENT(adj_animSpeed) );
+    gtk_box_pack_start(GTK_BOX(hbox), label, FALSE, TRUE, PADDING / 2);
+    gtk_box_pack_start(GTK_BOX(hbox), scale_animSpeed, TRUE, TRUE, PADDING);
+    gtk_box_pack_start(GTK_BOX(vbox), hbox, FALSE, TRUE, PADDING / 2);
 
-  gtk_box_pack_start(GTK_BOX(hbox), label,           FALSE, TRUE, PADDING/2);
-  gtk_box_pack_start(GTK_BOX(hbox), scale_animSpeed, TRUE, TRUE, PADDING);
-  gtk_box_pack_start(GTK_BOX(vbox), hbox,    FALSE, TRUE, PADDING/2);
+    hbox = gtk_hbox_new(FALSE, 0);
+    label = gtk_label_new(_("take piece delay"));
 
+    float takeDelay = config->read_float(config->disp(), ConfigManager::itemDisplayGtk_takePieceDelay);
+    takeDelay = takeDelay / 10;
+    GtkObject *adj_takeDelay = gtk_adjustment_new(takeDelay, // initial value
+                                                  0.0,       // lower
+                                                  100.0,     // upper
+                                                  1.0,       // step_increment
+                                                  10.0,      // page_increment
+                                                  0.0);      // page_size
 
-  hbox  = gtk_hbox_new(FALSE,0);
-  label = gtk_label_new(_("take piece delay"));
+    GtkWidget *scale_takeDelay = gtk_hscale_new(GTK_ADJUSTMENT(adj_takeDelay));
 
-  float takeDelay = config->read_float(config->disp(), ConfigManager::itemDisplayGtk_takePieceDelay);
-  takeDelay = takeDelay/10;
-  GtkObject* adj_takeDelay = gtk_adjustment_new(takeDelay, // initial value
-						0.0,  // lower
-						100.0, // upper
-						1.0,  // step_increment
-						10.0, // page_increment
-						0.0); // page_size
+    gtk_box_pack_start(GTK_BOX(hbox), label, FALSE, TRUE, PADDING / 2);
+    gtk_box_pack_start(GTK_BOX(hbox), scale_takeDelay, TRUE, TRUE, PADDING);
+    gtk_box_pack_start(GTK_BOX(vbox), hbox, FALSE, TRUE, PADDING / 2);
 
-  GtkWidget* scale_takeDelay = gtk_hscale_new(GTK_ADJUSTMENT(adj_takeDelay));
+    gtk_box_pack_start(GTK_BOX(GTK_DIALOG(pref_dialog)->vbox), vbox, FALSE, TRUE, PADDING);
 
-  gtk_box_pack_start(GTK_BOX(hbox), label,           FALSE, TRUE, PADDING/2);
-  gtk_box_pack_start(GTK_BOX(hbox), scale_takeDelay, TRUE, TRUE, PADDING);
-  gtk_box_pack_start(GTK_BOX(vbox), hbox,    FALSE, TRUE, PADDING/2);
+    gtk_scale_set_value_pos(GTK_SCALE(scale_animSpeed), GTK_POS_RIGHT);
+    gtk_scale_set_value_pos(GTK_SCALE(scale_takeDelay), GTK_POS_RIGHT);
 
-  gtk_box_pack_start(GTK_BOX(GTK_DIALOG(pref_dialog)->vbox), vbox, FALSE, TRUE, PADDING);
+    gtk_widget_show_all(pref_dialog);
 
-  gtk_scale_set_value_pos(GTK_SCALE(scale_animSpeed), GTK_POS_RIGHT);
-  gtk_scale_set_value_pos(GTK_SCALE(scale_takeDelay), GTK_POS_RIGHT);
-
-  gtk_widget_show_all(pref_dialog);
-
-  // can run it
-  gint button = gtk_dialog_run(GTK_DIALOG(pref_dialog));
-  bool newValues = false;
-  switch (button)
-    {
+    // can run it
+    gint button = gtk_dialog_run(GTK_DIALOG(pref_dialog));
+    bool newValues = false;
+    switch (button)     {
     case GTK_RESPONSE_ACCEPT:
-      {
-	config->store(config->disp(),
-	              ConfigManager::itemDisplay_showGameOverMessageBox,
-		      bool(gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(check_gameOverReq))));
-	config->store(config->disp(),
-	              ConfigManager::itemDisplayGtk_coloredCrossingsWhileDragging,
-		      bool(gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(check_colCross))));
-	config->store(config->disp(),
-	              ConfigManager::itemDisplayGtk_animateComputerMoves,
-		      bool(gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(check_animComp))));
-	config->store(config->disp(),
-	              ConfigManager::itemDisplayGtk_animateSettingOfPieces,
-		      bool(gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(check_animSet))));
-	config->store(config->disp(),
-	              ConfigManager::itemDisplayGtk_animateTakes,
-		      bool(gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(check_animTake))));
-	config->store(config->disp(),
-	              ConfigManager::itemDisplayGtk_showCoordinates,
-		      bool(gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(check_showCoords))));
+    {
+        config->store(config->disp(),
+                      ConfigManager::itemDisplay_showGameOverMessageBox,
+                      bool(gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(check_gameOverReq))));
+        config->store(config->disp(),
+                      ConfigManager::itemDisplayGtk_coloredCrossingsWhileDragging,
+                      bool(gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(check_colCross))));
+        config->store(config->disp(),
+                      ConfigManager::itemDisplayGtk_animateComputerMoves,
+                      bool(gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(check_animComp))));
+        config->store(config->disp(),
+                      ConfigManager::itemDisplayGtk_animateSettingOfPieces,
+                      bool(gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(check_animSet))));
+        config->store(config->disp(),
+                      ConfigManager::itemDisplayGtk_animateTakes,
+                      bool(gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(check_animTake))));
+        config->store(config->disp(),
+                      ConfigManager::itemDisplayGtk_showCoordinates,
+                      bool(gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(check_showCoords))));
 
-	config->store(config->disp(),
-	              ConfigManager::itemDisplayGtk_animationSpeed,
-		      float( 20*(100-gtk_range_get_value(GTK_RANGE(scale_animSpeed))) ));
-	config->store(config->disp(),
-	              ConfigManager::itemDisplayGtk_takePieceDelay,
-		      float( 10*     gtk_range_get_value(GTK_RANGE(scale_takeDelay)) ));
+        config->store(config->disp(),
+                      ConfigManager::itemDisplayGtk_animationSpeed,
+                      float(20 * (100 - gtk_range_get_value(GTK_RANGE(scale_animSpeed)))));
+        config->store(config->disp(),
+                      ConfigManager::itemDisplayGtk_takePieceDelay,
+                      float(10 * gtk_range_get_value(GTK_RANGE(scale_takeDelay))));
 
-	newValues = true;
-      }
-      break;
+        newValues = true;
+    }
+    break;
 
     default:
-      /* do no changes */
-      break;
+        /* do no changes */
+        break;
     }
 
-  gtk_widget_destroy (pref_dialog);
+    gtk_widget_destroy(pref_dialog);
 
-  return newValues;
+    return newValues;
 }
-

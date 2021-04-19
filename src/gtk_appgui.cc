@@ -30,194 +30,181 @@
 #include <boost/bind.hpp>
 #include <glib/gthread.h>
 
-
-static gboolean delete_callback(GtkWidget *widget, GdkEvent* event, gpointer data)
+static gboolean delete_callback(GtkWidget *widget, GdkEvent *event, gpointer data)
 {
-  return FALSE;
+    return FALSE;
 }
-
 
 static void cb_destroy(GtkWidget *widget, gpointer data)
 {
-  ((ApplicationGUI_Gtk*)(data))->quitApplication();
+    ((ApplicationGUI_Gtk *)(data))->quitApplication();
 }
-
 
 /* This function should also work if MainApp is not fully functional yet.
  */
 ApplicationGUI_Gtk::ApplicationGUI_Gtk()
 {
-  window = gtk_window_new(GTK_WINDOW_TOPLEVEL);
-  main_vbox = gtk_vbox_new(false,0);
-  gtk_container_add (GTK_CONTAINER (window), main_vbox);
+    window = gtk_window_new(GTK_WINDOW_TOPLEVEL);
+    main_vbox = gtk_vbox_new(false, 0);
+    gtk_container_add(GTK_CONTAINER(window), main_vbox);
 
-  gtk_window_set_policy(GTK_WINDOW(window), TRUE, TRUE, FALSE);
-  gtk_widget_realize(window);
+    gtk_window_set_policy(GTK_WINDOW(window), TRUE, TRUE, FALSE);
+    gtk_widget_realize(window);
 
-  // statusbar
+    // statusbar
 
-  statusbar = gtk_statusbar_new();
-  statusbar_context = gtk_statusbar_get_context_id(GTK_STATUSBAR(statusbar), "mainapp");
-  gtk_box_pack_end(GTK_BOX(main_vbox), statusbar, false,true,0);
+    statusbar = gtk_statusbar_new();
+    statusbar_context = gtk_statusbar_get_context_id(GTK_STATUSBAR(statusbar), "mainapp");
+    gtk_box_pack_end(GTK_BOX(main_vbox), statusbar, false, true, 0);
 
-  progressbar = gtk_progress_bar_new();
-  gtk_box_pack_start(GTK_BOX(statusbar), progressbar, false,true,0);
-  gtk_box_reorder_child(GTK_BOX(statusbar), progressbar, 0);
+    progressbar = gtk_progress_bar_new();
+    gtk_box_pack_start(GTK_BOX(statusbar), progressbar, false, true, 0);
+    gtk_box_reorder_child(GTK_BOX(statusbar), progressbar, 0);
 
-  // signals
+    // signals
 
-  gtk_signal_connect(GTK_OBJECT(window), "destroy",      GTK_SIGNAL_FUNC(cb_destroy), this);
-  gtk_signal_connect(GTK_OBJECT(window), "delete_event", GTK_SIGNAL_FUNC(delete_callback), this);
+    gtk_signal_connect(GTK_OBJECT(window), "destroy", GTK_SIGNAL_FUNC(cb_destroy), this);
+    gtk_signal_connect(GTK_OBJECT(window), "delete_event", GTK_SIGNAL_FUNC(delete_callback), this);
 }
-
 
 ApplicationGUI_Gtk::~ApplicationGUI_Gtk()
 {
 }
 
-
-void ApplicationGUI_Gtk::initApplicationGUI(int& argc, char**& argv)
+void ApplicationGUI_Gtk::initApplicationGUI(int &argc, char **&argv)
 {
-  gdk_threads_init();
+    gdk_threads_init();
 
-  gtk_init(&argc,&argv);
+    gtk_init(&argc, &argv);
 
-  // attach app-GUI and board-GUI to main application
+    // attach app-GUI and board-GUI to main application
 
-  ApplicationGUI_Gtk* appgui = new ApplicationGUI_Gtk;
-  MainApp::app().setApplicationGUI( appgui_ptr(appgui) );
-  MainApp::app().setThreadTunnel( getThreadTunnel_Gtk() );
+    ApplicationGUI_Gtk *appgui = new ApplicationGUI_Gtk;
+    MainApp::app().setApplicationGUI(appgui_ptr(appgui));
+    MainApp::app().setThreadTunnel(getThreadTunnel_Gtk());
 
-  BoardGUI_GtkCairo* boardgui = new BoardGUI_GtkCairo;
-  appgui->setBoardGUI( boardgui_ptr(boardgui));
+    BoardGUI_GtkCairo *boardgui = new BoardGUI_GtkCairo;
+    appgui->setBoardGUI(boardgui_ptr(boardgui));
 
-  gtk_box_pack_end(GTK_BOX(appgui->getMainWindowVBox()), boardgui->getBoardWidget(), true,true,0);
+    gtk_box_pack_end(GTK_BOX(appgui->getMainWindowVBox()), boardgui->getBoardWidget(), true, true, 0);
 
-  ConfigManager_Chained* config = new ConfigManager_Application();
-  config->setDelegate(configmanager_ptr(new ConfigManager_AppGtk));
+    ConfigManager_Chained *config = new ConfigManager_Application();
+    config->setDelegate(configmanager_ptr(new ConfigManager_AppGtk));
 
-  MainApp::app().registerConfigManager(configmanager_ptr(config));
+    MainApp::app().registerConfigManager(configmanager_ptr(config));
 }
-
 
 void ApplicationGUI_Gtk::startApplication()
 {
-  GameControl& control = MainApp::app().getControl();
+    GameControl &control = MainApp::app().getControl();
 
-  control.getSignal_changeState().connect(boost::bind(&ApplicationGUI_Gtk::changeState, this, _1));
-  control.getSignal_changeBoard().connect(boost::bind(&ApplicationGUI_Gtk::changeBoard, this));
-  control.getSignal_startMove()  .connect(boost::bind(&ApplicationGUI_Gtk::startMove,   this));
+    control.getSignal_changeState().connect(boost::bind(&ApplicationGUI_Gtk::changeState, this, _1));
+    control.getSignal_changeBoard().connect(boost::bind(&ApplicationGUI_Gtk::changeBoard, this));
+    control.getSignal_startMove().connect(boost::bind(&ApplicationGUI_Gtk::startMove, this));
 
-  gtk_initMainMenu(main_vbox, window);
-  gtk_connectMenuSignals();
+    gtk_initMainMenu(main_vbox, window);
+    gtk_connectMenuSignals();
 
-  showWindow();
+    showWindow();
 
-  MainApp::app().getConfigManager()->readInitialValues(); // TODO: this should probably be in MainApp.init()
+    MainApp::app().getConfigManager()->readInitialValues(); // TODO: this should probably be in MainApp.init()
 
-  control.startNextMove();
+    control.startNextMove();
 
-  // === main loop ===
+    // === main loop ===
 
-  gdk_threads_enter();
-  gtk_main();
-  gdk_threads_leave();
+    gdk_threads_enter();
+    gtk_main();
+    gdk_threads_leave();
 }
-
 
 void ApplicationGUI_Gtk::quitApplication()
 {
-  showMoveLog(false, true);
-  MainApp::app().getControl().stopThreads();
-  gtk_main_quit();
+    showMoveLog(false, true);
+    MainApp::app().getControl().stopThreads();
+    gtk_main_quit();
 }
 
-
-void ApplicationGUI_Gtk::changeState(const GameState& state)
+void ApplicationGUI_Gtk::changeState(const GameState &state)
 {
 }
-
 
 void ApplicationGUI_Gtk::changeBoard()
 {
 }
 
-
 void ApplicationGUI_Gtk::startMove()
 {
 }
 
-
 void ApplicationGUI_Gtk::preferencesDialog_Display()
 {
-  ::preferencesDialog_Display();
-  gui_board->resetDisplay();
+    ::preferencesDialog_Display();
+    gui_board->resetDisplay();
 }
-
 
 void ApplicationGUI_Gtk::showMoveLog(bool enable, bool quitApp)
 {
-  if (enable)
-    {
-      gui_movelog = boost::shared_ptr<MoveLog>(new MoveLog_Gtk);
+    if (enable) {
+        gui_movelog = boost::shared_ptr<MoveLog>(new MoveLog_Gtk);
 
-      gui_movelog->getSignal_windowClosed().connect(boost::bind(&ApplicationGUI_Gtk::showMoveLog, this,false,false));
-      gui_movelog->getSignal_windowClosed().connect(boost::bind(menu_closedMoveLog, false));
-    }
-  else
-    {
-      gui_movelog.reset();
+        gui_movelog->getSignal_windowClosed().connect(boost::bind(&ApplicationGUI_Gtk::showMoveLog, this, false, false));
+        gui_movelog->getSignal_windowClosed().connect(boost::bind(menu_closedMoveLog, false));
+    } else {
+        gui_movelog.reset();
     }
 
-  if (!quitApp)
-    {
-      configmanager_ptr config = MainApp::app().getConfigManager();
-      config->store(config->main(), ConfigManager::itemPref_showLogOfMoves, enable);
+    if (!quitApp) {
+        configmanager_ptr config = MainApp::app().getConfigManager();
+        config->store(config->main(), ConfigManager::itemPref_showLogOfMoves, enable);
     }
 }
-
 
 void ApplicationGUI_Gtk::showGameOverDialog(Player winner)
 {
-  if (!options.showGameOverRequester)
-    { return; }
-
-  const char* text;
-  switch (winner)
-    {
-    case PL_White: text=_("White has won."); break;
-    case PL_Black: text=_("Black has won."); break;
-    case PL_None:  text=_("Tie between both players."); break;
+    if (!options.showGameOverRequester) {
+        return;
     }
 
-  GtkWidget* dialog = gtk_message_dialog_new(GTK_WINDOW(window),
-					     GTK_DIALOG_DESTROY_WITH_PARENT,
-					     GTK_MESSAGE_INFO,
-					     GTK_BUTTONS_OK,
-					     _("Game over"));
-  gtk_message_dialog_format_secondary_text(GTK_MESSAGE_DIALOG(dialog), "%s", text);
+    const char *text;
+    switch (winner) {
+    case PL_White:
+        text = _("White has won.");
+        break;
+    case PL_Black:
+        text = _("Black has won.");
+        break;
+    case PL_None:
+        text = _("Tie between both players.");
+        break;
+    }
 
-  gtk_dialog_run(GTK_DIALOG (dialog));
-  gtk_widget_destroy (dialog);
+    GtkWidget *dialog = gtk_message_dialog_new(GTK_WINDOW(window),
+                                               GTK_DIALOG_DESTROY_WITH_PARENT,
+                                               GTK_MESSAGE_INFO,
+                                               GTK_BUTTONS_OK,
+                                               _("Game over"));
+    gtk_message_dialog_format_secondary_text(GTK_MESSAGE_DIALOG(dialog), "%s", text);
+
+    gtk_dialog_run(GTK_DIALOG(dialog));
+    gtk_widget_destroy(dialog);
 }
-
 
 void ApplicationGUI_Gtk::showAboutDialog()
 {
-  const char* authors[] =
+    const char *authors[] =
     {
-      "Dirk Farin <dirk.farin@gmail.com>",
-      NULL
-    };
+        "Dirk Farin <dirk.farin@gmail.com>",
+        NULL };
 
-  gtk_show_about_dialog (GTK_WINDOW(window),
-			 "program-name", PACKAGE_NAME,
-			 //"logo", example_logo,
-			 //"title", _("About Gnome Nine-Mens-Morris"),  // tag does not exist ?
-			 "authors", authors,
-			 "version", VERSION,
-			 "comments", _("A computer adaptation of the Nine-Mens-Morris board game and its variants."),
-			 "copyright", "Copyright (c) 2009 Dirk Farin",
-			 //"website", "morris.org",
-			 NULL);
+    gtk_show_about_dialog(GTK_WINDOW(window),
+                          "program-name", PACKAGE_NAME,
+                          //"logo", example_logo,
+                          //"title", _("About Gnome Nine-Mens-Morris"),  // tag does not exist ?
+                          "authors", authors,
+                          "version", VERSION,
+                          "comments", _("A computer adaptation of the Nine-Mens-Morris board game and its variants."),
+                          "copyright", "Copyright (c) 2009 Dirk Farin",
+                          //"website", "morris.org",
+                          NULL);
 }

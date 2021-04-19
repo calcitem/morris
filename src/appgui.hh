@@ -23,26 +23,42 @@
 #include "boardgui.hh"
 #include "util.hh"
 
-
 class ApplicationGUI
 {
 public:
-  virtual ~ApplicationGUI() { }
+    virtual ~ApplicationGUI()
+    {
+    }
 
-  virtual void setProgress(float) { }
-  virtual void setStatusbar(const std::string&) { }
+    virtual void setProgress(float)
+    {
+    }
+    virtual void setStatusbar(const std::string &)
+    {
+    }
 
-  virtual void showGameOverDialog(Player winner) { }
-  virtual void preferencesDialog_Display() { }
-  virtual void showAboutDialog() { }
-  virtual void showMoveLog(bool enable=true, bool quitapp=false) { }
-  virtual bool isMoveLogShown() const { return false; }
+    virtual void showGameOverDialog(Player winner)
+    {
+    }
+    virtual void preferencesDialog_Display()
+    {
+    }
+    virtual void showAboutDialog()
+    {
+    }
+    virtual void showMoveLog(bool enable = true, bool quitapp = false)
+    {
+    }
+    virtual bool isMoveLogShown() const
+    {
+        return false;
+    }
 
-  virtual boardgui_ptr getBoardGUI() const = 0;
+    virtual boardgui_ptr getBoardGUI() const = 0;
 
-  // run main-loop
-  virtual void startApplication() = 0;
-  virtual void quitApplication() = 0;
+    // run main-loop
+    virtual void startApplication() = 0;
+    virtual void quitApplication() = 0;
 };
 
 typedef boost::shared_ptr<ApplicationGUI> appgui_ptr;

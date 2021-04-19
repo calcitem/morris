@@ -24,69 +24,94 @@
 #include <gtk/gtk.h>
 #include <string>
 
-
 class ApplicationGUI_Gtk : public ApplicationGUI_GtkIF
 {
 public:
-  ApplicationGUI_Gtk();
-  ~ApplicationGUI_Gtk();
+    ApplicationGUI_Gtk();
+    ~ApplicationGUI_Gtk();
 
-  static void initApplicationGUI(int& argc, char**& argv);
+    static void initApplicationGUI(int &argc, char **&argv);
 
-  virtual void startApplication();
-  virtual void quitApplication();
+    virtual void startApplication();
+    virtual void quitApplication();
 
-  virtual void setProgress(float p)
-  {
-    gtk_progress_bar_set_fraction(GTK_PROGRESS_BAR(progressbar), p);
-  }
+    virtual void setProgress(float p)
+    {
+        gtk_progress_bar_set_fraction(GTK_PROGRESS_BAR(progressbar), p);
+    }
 
-  virtual void setStatusbar(const std::string& str)
-  {
-    gtk_statusbar_pop (GTK_STATUSBAR(statusbar), statusbar_context);
-    gtk_statusbar_push(GTK_STATUSBAR(statusbar), statusbar_context, str.c_str());
-  }
+    virtual void setStatusbar(const std::string &str)
+    {
+        gtk_statusbar_pop(GTK_STATUSBAR(statusbar), statusbar_context);
+        gtk_statusbar_push(GTK_STATUSBAR(statusbar), statusbar_context, str.c_str());
+    }
 
-  void showGameOverDialog(Player winner);
-  void enableGameOverDialog(bool flag) { options.showGameOverRequester = flag; }
-  bool getGameOverDialogFlag() const { return options.showGameOverRequester; }
+    void showGameOverDialog(Player winner);
+    void enableGameOverDialog(bool flag)
+    {
+        options.showGameOverRequester = flag;
+    }
+    bool getGameOverDialogFlag() const
+    {
+        return options.showGameOverRequester;
+    }
 
-  void preferencesDialog_Display();
-  void showMoveLog(bool enable=true, bool quitApp=false);
-  bool isMoveLogShown() const { return gui_movelog != NULL; }
+    void preferencesDialog_Display();
+    void showMoveLog(bool enable = true, bool quitApp = false);
+    bool isMoveLogShown() const
+    {
+        return gui_movelog != NULL;
+    }
 
-  GtkWidget* getMainWindow() { return window; }
-  GtkWidget* getMainWindowVBox() { return main_vbox; }
-  void       showWindow() { gtk_widget_show_all(window); }
+    GtkWidget *getMainWindow()
+    {
+        return window;
+    }
+    GtkWidget *getMainWindowVBox()
+    {
+        return main_vbox;
+    }
+    void showWindow()
+    {
+        gtk_widget_show_all(window);
+    }
 
-  void setBoardGUI(boardgui_ptr gui) { gui_board=gui; }
-  boardgui_ptr getBoardGUI() const { return gui_board; }
-  void showAboutDialog();
+    void setBoardGUI(boardgui_ptr gui)
+    {
+        gui_board = gui;
+    }
+    boardgui_ptr getBoardGUI() const
+    {
+        return gui_board;
+    }
+    void showAboutDialog();
 
 private:
-  GtkWidget* window;
-  GtkWidget* main_vbox;
+    GtkWidget *window;
+    GtkWidget *main_vbox;
 
-  GtkWidget* statusbar;
-  gint statusbar_context;
+    GtkWidget *statusbar;
+    gint statusbar_context;
 
-  GtkWidget* progressbar;
+    GtkWidget *progressbar;
 
-  boardgui_ptr  gui_board;
-  boost::shared_ptr<MoveLog> gui_movelog;
+    boardgui_ptr gui_board;
+    boost::shared_ptr<MoveLog> gui_movelog;
 
-  struct Options
-  {
-    Options() : showGameOverRequester(true) { }
+    struct Options
+    {
+        Options() : showGameOverRequester(true)
+        {
+        }
 
-    bool showGameOverRequester;
-  } options;
+        bool showGameOverRequester;
+    } options;
 
-  friend void gtk_initMainMenu(GtkWidget* vbox, GtkWidget* window);
+    friend void gtk_initMainMenu(GtkWidget *vbox, GtkWidget *window);
 
-  void changeState(const struct GameState& state);
-  void changeBoard();
-  void startMove();
+    void changeState(const struct GameState &state);
+    void changeBoard();
+    void startMove();
 };
 
 #endif

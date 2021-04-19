@@ -24,113 +24,112 @@
 
 #include <gtk/gtk.h>
 
-
 static gboolean cb_setProgress(gpointer p)
 {
-  float* progress = (float*)p;
+    float *progress = (float *)p;
 
-  MainApp::app().getApplicationGUI()->setProgress(*progress);
-  delete progress;
+    MainApp::app().getApplicationGUI()->setProgress(*progress);
+    delete progress;
 
-  return FALSE;
+    return FALSE;
 }
 
 static gboolean cb_setStatusbar(gpointer p)
 {
-  std::string* str = (std::string*)p;
+    std::string *str = (std::string *)p;
 
-  MainApp::app().getApplicationGUI()->setStatusbar(*str);
-  delete str;
+    MainApp::app().getApplicationGUI()->setStatusbar(*str);
+    delete str;
 
-  return FALSE;
+    return FALSE;
 }
 
 struct MoveData
 {
-  Move move;
-  int  gameID;
+    Move move;
+    int gameID;
 };
 
 static gboolean cb_doMove(gpointer p)
 {
-  MoveData* m = (MoveData*)p;
+    MoveData *m = (MoveData *)p;
 
-  gdk_threads_enter(); // see gtk_boardgui.cc for why this is needed
-  MainApp::app().visualizeMove(m->move, m->gameID);
-  gdk_threads_leave();
-  delete m;
+    gdk_threads_enter(); // see gtk_boardgui.cc for why this is needed
+    MainApp::app().visualizeMove(m->move, m->gameID);
+    gdk_threads_leave();
+    delete m;
 
-  return FALSE;
+    return FALSE;
 }
 
-
 // ---------------------------------------------------------------------------
-
 
 class ThreadTunnel_Gtk : public ThreadTunnel
 {
 public:
-  void setStatusbar(const char* buf)
-  {
-    g_idle_add( cb_setStatusbar, new std::string(buf) );
-  }
-
-  void setProgress(float progress)
-  {
-    float* p = new float;
-    *p = progress;
-
-    g_idle_add( cb_setProgress, p );
-  }
-
-  void doMove(Move m, int gameID)
-  {
-    MoveData* md = new MoveData;
-    md->move = m;
-    md->gameID = gameID;
-
-    g_idle_add( cb_doMove, md );
-  }
-
-  void showThinkingInfo(const std::string& str)
-  {
-    class IdleFunc_showThinking : public IdleFunc
+    void setStatusbar(const char *buf)
     {
-    public:
-      IdleFunc_showThinking(const std::string& s) : m_string(s) { }
+        g_idle_add(cb_setStatusbar, new std::string(buf));
+    }
 
-      void operator()() { MainApp::app().setThinkingInfo(m_string); }
+    void setProgress(float progress)
+    {
+        float *p = new float;
+        *p = progress;
 
-      std::string m_string;
-    };
+        g_idle_add(cb_setProgress, p);
+    }
 
-    IdleFunc::install(new IdleFunc_showThinking(str));
-  }
+    void doMove(Move m, int gameID)
+    {
+        MoveData *md = new MoveData;
+        md->move = m;
+        md->gameID = gameID;
+
+        g_idle_add(cb_doMove, md);
+    }
+
+    void showThinkingInfo(const std::string &str)
+    {
+        class IdleFunc_showThinking : public IdleFunc
+        {
+        public:
+            IdleFunc_showThinking(const std::string &s) : m_string(s)
+            {
+            }
+
+            void operator()()
+            {
+                MainApp::app().setThinkingInfo(m_string);
+            }
+
+            std::string m_string;
+        };
+
+        IdleFunc::install(new IdleFunc_showThinking(str));
+    }
 };
-
 
 static ThreadTunnel_Gtk guicb_gtk;
 
-ThreadTunnel& getThreadTunnel_Gtk()
+ThreadTunnel &getThreadTunnel_Gtk()
 {
-  return guicb_gtk;
+    return guicb_gtk;
 }
-
-
 
 // ---------------------------------------------------------------------------
 
 static gboolean cb_idlefunc(gpointer p)
 {
-  IdleFunc* func = (IdleFunc*)p;
+    IdleFunc *func = (IdleFunc *)p;
 
-  (*func)();
+    (*func)();
 
-  delete func;
-  return FALSE;
+    delete func;
+    return FALSE;
 }
 
-void IdleFunc::install(IdleFunc* func)
+void IdleFunc::install(IdleFunc *func)
 {
-  g_idle_add( cb_idlefunc, func );
+    g_idle_add(cb_idlefunc, func);
 }

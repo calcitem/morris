@@ -21,6 +21,7 @@
 
 #include "threadtunnel.hh"
 
-ThreadTunnel& getThreadTunnel_Gtk();
+ThreadTunnel &getThreadTunnel_Gtk();
 
+#endif
 #endif

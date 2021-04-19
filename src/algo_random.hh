@@ -22,7 +22,6 @@
 #include "control.hh"
 #include <stdlib.h>
 
-
 /* A very dumb AI that just makes a random move.
    Was mainly used to test the move generation.
    Is not employed in the current program.
@@ -30,19 +29,31 @@
 class PlayerIF_AlgoRandom : public PlayerIF
 {
 public:
-  PlayerIF_AlgoRandom() { }
+    PlayerIF_AlgoRandom()
+    {
+    }
 
-  void registerThreadTunnel(ThreadTunnel& tunnel) { m_tunnel=&tunnel; }
+    void registerThreadTunnel(ThreadTunnel &tunnel)
+    {
+        m_tunnel = &tunnel;
+    }
 
-  bool isInteractivePlayer() const { return false; }
+    bool isInteractivePlayer() const
+    {
+        return false;
+    }
 
-  void startMove(const Board& current, int moveID);
+    void startMove(const Board &current, int moveID);
 
-  void forceMove() { }
-  void cancelMove() { }
+    void forceMove()
+    {
+    }
+    void cancelMove()
+    {
+    }
 
 private:
-  class ThreadTunnel* m_tunnel;
+    class ThreadTunnel *m_tunnel;
 };
 
 #endif
