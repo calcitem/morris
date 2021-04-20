@@ -32,7 +32,7 @@
 #define LOGSEARCH false
 #define ALGOTRACE 0
 
-const PlayerIF_AlgoAB::eval_t EVAL_INFTY = 10000;
+const PlayerIF_AlgoAB::eval_t VALUE_INFINITE = 10000;
 const PlayerIF_AlgoAB::eval_t EVAL_WIN = 9000;
 
 inline void addPly(PlayerIF_AlgoAB::eval_t &e)
@@ -54,7 +54,7 @@ inline void subPly(PlayerIF_AlgoAB::eval_t &e)
 int nPlysUntilEnd(PlayerIF_AlgoAB::eval_t e)
 {
     e = fabs(e);
-    return EVAL_INFTY - e;
+    return VALUE_INFINITE - e;
 }
 
 static int timeDiff_ms(const struct timeval &t1,
@@ -93,7 +93,7 @@ void PlayerIF_AlgoAB::resetGame()
 
 void startSearchThread(class PlayerIF_AlgoAB *);
 
-void PlayerIF_AlgoAB::startMove(const Board &curr, int moveID)
+void PlayerIF_AlgoAB::startMove(const Position &curr, int moveID)
 {
     /*
       std::cout << "-------------------- ";
@@ -108,7 +108,7 @@ void PlayerIF_AlgoAB::startMove(const Board &curr, int moveID)
     m_ignoreMove = false;
     m_computedSomeMove = false;
 
-    m_startBoard = curr;
+    rootPos = curr;
     m_moveID = moveID;
 
     thread = g_thread_new(NULL, (GThreadFunc)startSearchThread, this);
@@ -133,10 +133,10 @@ void PlayerIF_AlgoAB::doSearch()
         m_nodesEvaluated = 0;
 
         Variation var;
-        e = NegaMax(m_startBoard, -EVAL_INFTY, EVAL_INFTY, 0, depth, var, true);
+        e = search(rootPos, -VALUE_INFINITE, VALUE_INFINITE, 0, depth, var, true);
 
         // normalize evaluation for white
-        if (m_startBoard.getCurrentPlayer() == PL_Black) {
+        if (rootPos.getCurrentPlayer() == PL_Black) {
             e = -e;
         }
 
@@ -226,19 +226,19 @@ inline void PlayerIF_AlgoAB::checkTime()
 
 #define INDENT std::cout << "-" << (&"| | | | | | | | | | "[20 - currDepth * 2]);
 
-float PlayerIF_AlgoAB::NegaMax(const Board &board, float alpha, float beta,
-                               int currDepth, int levels_to_go, Variation &variation, bool useTT)
+float PlayerIF_AlgoAB::search(const Position &pos, float alpha, float beta,
+                               int originDepth, int depth, Variation &variation, bool useTT)
 {
     if (ALGOTRACE) {
         INDENT;
         std::cout << "--- NEGAMAX (" << alpha << ";" << beta << ") ---\n";
     }
 
-    const bool atRoot = (currDepth == 0);
+    const bool atRoot = (originDepth == 0);
 
     // check thinking time and stop if we were thinking too long
 
-    if (levels_to_go > 5 || atRoot) {
+    if (depth > 5 || atRoot) {
         if (useTT)
             checkTime();
     }
@@ -253,8 +253,8 @@ float PlayerIF_AlgoAB::NegaMax(const Board &board, float alpha, float beta,
 
     // check winning situations
 
-    if (board.getNPiecesLeft(board.getCurrentPlayer()) < 3) {
-        return -EVAL_INFTY;
+    if (pos.getNPiecesLeft(pos.getCurrentPlayer()) < 3) {
+        return -VALUE_INFINITE;
     }
 
     // check transposition-table
@@ -263,9 +263,9 @@ float PlayerIF_AlgoAB::NegaMax(const Board &board, float alpha, float beta,
 
     const TranspositionTable::TTEntry *entry = NULL;
     if (useTT)
-        entry = m_ttable->lookup(board.getHash(), board);
+        entry = m_ttable->search(pos.key(), pos);
     if (entry) {
-        if (entry->depth8 >= levels_to_go) {
+        if (entry->depth8 >= depth) {
             if (ALGOTRACE) {
                 INDENT;
                 std::cout << "found table entry !\n";
@@ -275,7 +275,7 @@ float PlayerIF_AlgoAB::NegaMax(const Board &board, float alpha, float beta,
                 if (atRoot) {
                     m_move = entry->ttMove;
                     m_computedSomeMove = true;
-                    logBestMoveFromTable(board, m_move, entry->value8, entry->depth8);
+                    logBestMoveFromTable(pos, m_move, entry->value8, entry->depth8);
                 }
 
                 if (ALGOTRACE) {
@@ -306,11 +306,11 @@ float PlayerIF_AlgoAB::NegaMax(const Board &board, float alpha, float beta,
 
     // process leaves
 
-    if (levels_to_go == 0) {
-        float eval = Eval(board, levels_to_go);
+    if (depth == 0) {
+        float eval = Eval(pos, depth);
 
         /*
-              float memeval = -m_posMemory.lookupHash(board);
+              float memeval = -m_posMemory.lookupHash(pos);
               if (memeval!=0)
             {
               subPly(memeval);
@@ -327,20 +327,20 @@ float PlayerIF_AlgoAB::NegaMax(const Board &board, float alpha, float beta,
 
     // try previous best-move first
 
-    Board tmpBoard;
-    float bestEval = -EVAL_INFTY;
+    Position tmpBoard;
+    float bestEval = -VALUE_INFINITE;
     Move bestMove;
 
-    tmpBoard = board;
+    tmpBoard = pos;
 
     // recurse
 
     std::vector<Move> moves;
     moves.reserve(100); // speed-up move generation
-    m_ruleSpec->generateMoves(moves, board);
+    m_ruleSpec->generateMoves(moves, pos);
 
     if (moves.size() == 0) {
-        return -EVAL_INFTY;
+        return -VALUE_INFINITE;
     }
 
     // Move ordering: put most promising move to front
@@ -384,10 +384,10 @@ float PlayerIF_AlgoAB::NegaMax(const Board &board, float alpha, float beta,
         subPly(recBeta);
         eval_t recAlpha = alpha;
         subPly(recAlpha);
-        float eval = -NegaMax(tmpBoard, -recBeta, -recAlpha, currDepth + 1, levels_to_go - 1, childVar, useTT);
+        float eval = -search(tmpBoard, -recBeta, -recAlpha, originDepth + 1, depth - 1, childVar, useTT);
         addPly(eval);
 
-        if (currDepth == 0 && m_experience != NULL) {
+        if (originDepth == 0 && m_experience != NULL) {
             if (fabs(eval) < EVAL_WIN) {
                 float offset = m_experience->getOffset(m_ruleSpec->getBoardID_Symmetric(tmpBoard), m_selfPlayer);
                 offset *= m_weight[Weight_Experience];
@@ -411,7 +411,7 @@ float PlayerIF_AlgoAB::NegaMax(const Board &board, float alpha, float beta,
             variation.append(childVar);
 
             if (atRoot) {
-                logBestMove(variation, bestEval, levels_to_go);
+                logBestMove(variation, bestEval, depth);
                 m_move = bestMove;
                 m_computedSomeMove = true;
             }
@@ -441,9 +441,9 @@ float PlayerIF_AlgoAB::NegaMax(const Board &board, float alpha, float beta,
         }
     }
 
-    // insert into transposition-table
-    m_ttable->insert(board.getHash(), bestEval, TranspositionTable::boundType(bestEval, oldAlpha, beta),
-                     levels_to_go, bestMove, board);
+    // save into transposition-table
+    m_ttable->save(pos.key(), bestEval, TranspositionTable::boundType(bestEval, oldAlpha, beta),
+                     depth, bestMove, pos);
 
     if (ALGOTRACE) {
         INDENT;
@@ -455,13 +455,13 @@ float PlayerIF_AlgoAB::NegaMax(const Board &board, float alpha, float beta,
     return bestEval;
 }
 
-float PlayerIF_AlgoAB::Eval(const Board &board, int levelsToGo) const
+float PlayerIF_AlgoAB::Eval(const Position &pos, int levelsToGo) const
 {
     m_nodesEvaluated++;
 
     float eval = 0.0;
 
-    const Player me = board.getCurrentPlayer();
+    const Player me = pos.getCurrentPlayer();
     const Player other = opponent(me);
 
     const RuleSpec &ruleSpec = *m_ruleSpec;
@@ -469,28 +469,28 @@ float PlayerIF_AlgoAB::Eval(const Board &board, int levelsToGo) const
 
     // ========== material ==========
 
-    eval += m_weight[Weight_Material] * (board.getNPiecesLeft(board.getCurrentPlayer()) -
-                                         board.getNPiecesLeft(board.getOpponentPlayer()));
+    eval += m_weight[Weight_Material] * (pos.getNPiecesLeft(pos.getCurrentPlayer()) -
+                                         pos.getNPiecesLeft(pos.getOpponentPlayer()));
 
     // ========== freedom ==========
 
     int myFreedom = 0;
     int oppFreedom = 0;
     for (int i = 0; i < boardSpec.nPositions(); i++) {
-        /**/ if (board.getPosition(i) == me)
-            myFreedom += ruleSpec.freedomAtPosition(board, i);
-        else if (board.getPosition(i) == other)
-            oppFreedom += ruleSpec.freedomAtPosition(board, i);
+        /**/ if (pos.getPosition(i) == me)
+            myFreedom += ruleSpec.freedomAtPosition(pos, i);
+        else if (pos.getPosition(i) == other)
+            oppFreedom += ruleSpec.freedomAtPosition(pos, i);
     }
 
-    // Note: consider special case at start of game: no pieces on the board -> no freedom.
+    // Note: consider special case at start of game: no pieces on the pos -> no freedom.
 
     if (myFreedom == 0 &&
-        board.getNPiecesOnBoard(board.getCurrentPlayer()) > 0) {
-        if (ruleSpec.mayJump && board.getNPiecesLeft(board.getCurrentPlayer()) == 3) {
-        } else if (board.getNPiecesToSet(board.getCurrentPlayer()) > 0) {
+        pos.getNPiecesOnBoard(pos.getCurrentPlayer()) > 0) {
+        if (ruleSpec.mayJump && pos.getNPiecesLeft(pos.getCurrentPlayer()) == 3) {
+        } else if (pos.getNPiecesToSet(pos.getCurrentPlayer()) > 0) {
         } else {
-            return -EVAL_INFTY;
+            return -VALUE_INFINITE;
         }
     }
 
@@ -503,10 +503,10 @@ float PlayerIF_AlgoAB::Eval(const Board &board, int levelsToGo) const
     for (int i = 0; i < boardSpec.nMills(); i++) {
         const MillPosVector &mill = boardSpec.getMill(i);
 
-        Player p0 = board.getPosition(mill[0]);
+        Player p0 = pos.getPosition(mill[0]);
         if (p0 != PL_None &&
-            p0 == board.getPosition(mill[1]) &&
-            p0 == board.getPosition(mill[2])) {
+            p0 == pos.getPosition(mill[1]) &&
+            p0 == pos.getPosition(mill[2])) {
             if (p0 == me)
                 myMills++;
             else
@@ -520,17 +520,17 @@ float PlayerIF_AlgoAB::Eval(const Board &board, int levelsToGo) const
     // dummy weights for debugging ...
 
     for (int i = 0; i < m_control->getBoardSpec().nPositions(); i++) {
-        /**/ if (board.getPosition(i) == me)    eval += 24 - i;
-        else if (board.getPosition(i) == other) eval -= 24 - i;
+        /**/ if (pos.getPosition(i) == me)    eval += 24 - i;
+        else if (pos.getPosition(i) == other) eval -= 24 - i;
     }
 #endif
 
     return eval;
 }
 
-void PlayerIF_AlgoAB::logBestMoveFromTable(const Board &b, const Move &m, eval_t e, int depth) const
+void PlayerIF_AlgoAB::logBestMoveFromTable(const Position &b, const Move &m, eval_t e, int depth) const
 {
-    Board board = b;
+    Position pos = b;
     Move move = m;
 
     Variation v;
@@ -538,10 +538,10 @@ void PlayerIF_AlgoAB::logBestMoveFromTable(const Board &b, const Move &m, eval_t
     for (int i = 0; i <= depth; i++) {
         v.push_back(move);
 
-        board.doMove(move);
+        pos.doMove(move);
 
         const TranspositionTable::TTEntry *entry;
-        entry = m_ttable->lookup(board.getHash(), board);
+        entry = m_ttable->search(pos.key(), pos);
         if (entry) {
             move = entry->ttMove;
         } else
@@ -562,7 +562,7 @@ void PlayerIF_AlgoAB::logBestMove(const Variation &v, eval_t e, int depth, const
 {
     std::stringstream strstr;
 
-    Player p = m_startBoard.getCurrentPlayer();
+    Player p = rootPos.getCurrentPlayer();
     for (int i = 0; i < v.size(); i++) {
         strstr << writeMove(v[i], m_ruleSpec->boardSpec) << " ";
         if (p == PL_Black && i < v.size() - 1)
@@ -575,7 +575,7 @@ void PlayerIF_AlgoAB::logBestMove(const Variation &v, eval_t e, int depth, const
         strstr << e << " ";
 
         Player winner;
-        if (m_startBoard.getCurrentPlayer() == PL_White)
+        if (rootPos.getCurrentPlayer() == PL_White)
             winner = PL_White;
         else
             winner = PL_Black;
@@ -590,7 +590,7 @@ void PlayerIF_AlgoAB::logBestMove(const Variation &v, eval_t e, int depth, const
 
         int eInt = e;
         int eAbs = (eInt < 0 ? -eInt : eInt);
-        int iInt = EVAL_INFTY;
+        int iInt = VALUE_INFINITE;
 
         int winInMoves = (iInt - 1 - eAbs) / 2 + 1;
 
@@ -602,7 +602,7 @@ void PlayerIF_AlgoAB::logBestMove(const Variation &v, eval_t e, int depth, const
 
         strstr << buf;
     } else {
-        if (m_startBoard.getCurrentPlayer() == PL_Black)
+        if (rootPos.getCurrentPlayer() == PL_Black)
             e = -e;
         strstr << e << ')';
     }
@@ -625,8 +625,8 @@ void PlayerIF_AlgoAB::notifyWinner(Player p)
     const GameControl &control = MainApp::app().getControl();
 
     for (int i = 0; i < control.getHistorySize() - 1; i++) {
-        boost::shared_ptr<Board> board = control.getHistoryBoard(i);
+        boost::shared_ptr<Position> pos = control.getHistoryBoard(i);
 
-        m_experience->addBoard(m_ruleSpec->getBoardID_Symmetric(*board), p);
+        m_experience->addBoard(m_ruleSpec->getBoardID_Symmetric(*pos), p);
     }
 }

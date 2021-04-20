@@ -95,19 +95,19 @@ public:
         nEntries = 0;
     }
 
-    void storeBoard(const Board &b, float e)
+    void storeBoard(const Position &b, float e)
     {
         return;
 
-        int list = b.getHash() & ((1 << SIGNIFICANT_BITS) - 1);
+        int list = b.key() & ((1 << SIGNIFICANT_BITS) - 1);
         for (int i = 0; i < memory[list].size(); i++)         {
-            if (memory[list][i].key == b.getHash())             {
+            if (memory[list][i].key == b.key())             {
                 return;
             }
         }
 
         MemEntry mem;
-        mem.key = b.getHash();
+        mem.key = b.key();
         mem.e = e;
         memory[list].push_back(mem);
         nEntries++;
@@ -115,15 +115,15 @@ public:
         //std::cout << "position memory entries: " << nEntries << "\n";
     }
 
-    float lookupHash(const Board &b) const
+    float lookupHash(const Position &b) const
     {
         return 0.0;
 
-        Key key = b.getHash();
+        Key key = b.key();
 
-        int list = b.getHash() & ((1 << SIGNIFICANT_BITS) - 1);
+        int list = b.key() & ((1 << SIGNIFICANT_BITS) - 1);
         for (int i = 0; i < memory[list].size(); i++)         {
-            if (memory[list][i].key == b.getHash())             {
+            if (memory[list][i].key == b.key())             {
                 return memory[list][i].e;
             }
         }

@@ -142,7 +142,7 @@ BoardSpec_Polygon::BoardSpec_Polygon(int nCorners)
     millsAtPos.resize(nPositions());
 
     for (int i = 0; i < mills.size(); i++) {
-        // insert mill to position-indexed tables
+        // save mill to position-indexed tables
 
         for (int n = 0; n < 3; n++) {
             MillPosVector v2;
@@ -610,7 +610,7 @@ BoardSpec_Grid::BoardSpec_Grid(BoardPreset t)
 
         mills[i] = v;
 
-        // insert mill to position-indexed tables
+        // save mill to position-indexed tables
 
         for (int n = 0; n < millSize; n++) {
             MillPosVector v2;

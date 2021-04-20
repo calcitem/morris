@@ -106,7 +106,7 @@ public:
     // start a new game
     void resetGame();
 
-    void startMove(const Board &curr, int moveID);
+    void startMove(const Position &curr, int moveID);
 
     // Carry out the move as soon as possible.
     void forceMove();
@@ -119,12 +119,12 @@ public:
 private:
     void doSearch();
 
-    float NegaMax(const Board &board, float alpha, float beta,
+    float search(const Position &board, float alpha, float beta,
                   int currDepth, int levels_to_go, Variation &, bool useTT);
 
-    float Eval(const Board &board, int levelsToGo) const;
+    float Eval(const Position &board, int levelsToGo) const;
 
-    Board m_startBoard;
+    Position rootPos;
     Move m_move; // the move that is currently computed
 
     //PositionMemory m_posMemory;  // TODO: disabled, because not as effective as Experience
@@ -160,7 +160,7 @@ private:
 
     void logBestMove(const Variation &, eval_t, int depth, const char *suffix = "") const;
     void logBestMove(const Move &, eval_t, int depth) const;
-    void logBestMoveFromTable(const Board &, const Move &, eval_t, int depth) const;
+    void logBestMoveFromTable(const Position &, const Move &, eval_t, int depth) const;
 
     // statistics
 

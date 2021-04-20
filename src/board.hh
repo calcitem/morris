@@ -83,7 +83,7 @@ typedef unsigned long long Key;
 
 /* The board class hold the current configuation of the players' pieces, as well as
    additional status information like the current player and the number of pieces
-   each player can still set. The Board class also maintains a key-code for the
+   each player can still set. The Position class also maintains a key-code for the
    board using the Zobrist hashing algorithm.
 
    Additionally, the board can include a pointer to the previous board (in a running game).
@@ -91,7 +91,7 @@ typedef unsigned long long Key;
 
    NOTE: you have to call reset() before the board is in a playable state.
  */
-class Board
+class Position
 {
 public:
     void reset(int nPiecesToSet);
@@ -167,18 +167,18 @@ public:
 
     // --- chaining ---
 
-    void setPrevBoard(boost::shared_ptr<Board> b)
+    void setPrevBoard(boost::shared_ptr<Position> b)
     {
         prev = b;
     }
-    boost::shared_ptr<Board> getPrevBoard() const
+    boost::shared_ptr<Position> getPrevBoard() const
     {
         return prev;
     }
 
     // --- hashes ---
 
-    Key getHash() const
+    Key key() const
     {
         return key;
     }
@@ -193,7 +193,7 @@ public:
 
     // --- standard operators ---
 
-    bool operator==(const Board &b) const;
+    bool operator==(const Position &b) const;
 
     // --- debugging ---
 
@@ -207,7 +207,7 @@ private:
     signed char nPiecesToSet[2];
     signed char nPiecesOnBoard[2];
 
-    boost::shared_ptr<Board> prev;
+    boost::shared_ptr<Position> prev;
 
     // --- key ---
 

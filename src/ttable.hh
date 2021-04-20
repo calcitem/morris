@@ -31,7 +31,7 @@ public:
 
     void clear();
 
-    enum Bound
+    enum Bound : signed char
     {
         BOUND_LOWER,
         BOUND_EXACT,
@@ -43,7 +43,7 @@ public:
         Key key;
         float value8;
         signed char depth8; // depth to which this node was calculated
-        signed char genBound8;
+        Bound genBound8;
         Move ttMove;
 
 #if SAFE_HASH
@@ -56,14 +56,14 @@ public:
         }
     };
 
-    const TTEntry *lookup(Key h, const Board &) const;
-    void insert(Key h, float eval, Bound, int depth, const Move &bestMove, const Board &);
+    const TTEntry *search(Key key, const Board &) const;
+    void save(Key key, float value, Bound type, int depth, const Move &bestMove, const Board &);
 
-    static inline Bound boundType(float eval, float alpha, float beta)
+    static inline Bound boundType(float value, float alpha, float beta)
     {
-        if (eval <= alpha)
+        if (value <= alpha)
             return BOUND_UPPER;
-        if (eval >= beta)
+        if (value >= beta)
             return BOUND_LOWER;
 
         return BOUND_EXACT;
@@ -92,7 +92,7 @@ public:
     float getFillStatus() const;
 
 private:
-    TTEntry *table;
+    TTEntry *TT;
     int tableSize;
     Key mask;
 
@@ -124,7 +124,7 @@ inline std::ostream &operator<<(std::ostream &ostr, const TranspositionTable::Bo
 inline std::ostream &operator<<(std::ostream &ostr, const TranspositionTable::TTEntry &e)
 {
     ostr << "hash=" << std::hex << e.key
-        << " eval=" << e.value8
+        << " value=" << e.value8
         << " depth=" << ((int)e.depth8)
         << " bound=" << e.getBoundType()
         << " ttMove=" << e.ttMove;
